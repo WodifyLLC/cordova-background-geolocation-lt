@@ -7,6 +7,8 @@ declare module "cordova-background-geolocation-lt" {
 	* - [[schedulerEnabled]].
 	* - [[trackingMode]].
 	* - [[odometer]].
+  * - [[didLaunchInBackground]].
+  * - [[didDeviceReboot]]
 	*/
   interface State extends Config {
   	/**
@@ -41,5 +43,9 @@ declare module "cordova-background-geolocation-lt" {
     *
     */
     didLaunchInBackground: boolean;
+    /**
+    * Indicates if the app was launched after the device was rebooted.
+    */
+    didDeviceReboot: boolean;
   }
 }

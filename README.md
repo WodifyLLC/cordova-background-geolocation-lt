@@ -3,6 +3,8 @@ Cordova Background Geolocation &middot; [![npm](https://img.shields.io/npm/dm/co
 
 [![](https://dl.dropboxusercontent.com/s/nm4s5ltlug63vv8/logo-150-print.png?dl=1)](https://www.transistorsoft.com)
 
+-----------------------------------------------------------------
+### :new: :stop_sign: *Capacitor* version now available! See [__`capacitor-background-geolocation`__](https://github.com/transistorsoft/capacitor-background-geolocation) :stop_sign:
 -------------------------------------------------------------------------------
 
 The *most* sophisticated background **location-tracking & geofencing** module with battery-conscious motion-detection intelligence for **iOS** and **Android**.
@@ -13,7 +15,7 @@ The plugin's [Philosophy of Operation](../../wiki/Philosophy-of-Operation) is to
 
 - When the device is detected be **stationary**, the plugin will automatically turn off location-services to conserve energy.
 
-Also available for [React Native](https://github.com/transistorsoft/react-native-background-geolocation), [NativeScript](https://github.com/transistorsoft/nativescript-background-geolocation-lt) and pure native apps.
+Also available for [Capacitor](https://github.com/transistorsoft/capacitor-background-geolocation), [React Native](https://github.com/transistorsoft/react-native-background-geolocation), [Flutter](https://github.com/transistorsoft/flutter_background_geolocation).
 
 -----------------------------------------------------------------------------
 
@@ -43,6 +45,12 @@ The **[Android plugin](http://www.transistorsoft.com/shop/products/cordova-backg
 ## :large_blue_diamond: Installing the plugin ##
 
 :warning: After installing the plugin, you must [Configure the Plugin](#large_blue_diamond-configuring-the-plugin) for both [iOS](#ios) &amp; [Android](#android).
+:warning: Cocoapods __`>= 1.10.0`__ is required.
+```console
+$ pod --version
+// if < 1.10.0
+$ sudo gem install cocoapods
+```
 
 - #### From npm
 
@@ -94,22 +102,62 @@ $ cordova plugin add https://github.com/transistorsoft/cordova-background-geoloc
   xmlns:cdv="http://cordova.apache.org/ns/1.0">
 ```
 
-- Within the `<platform name="android">` container, add the `license_key` key using a `<config-file />` element:
+- Within the `<platform name="android">` container, add the `license` key using a `<config-file />` element:
 - :information_source: If you haven't yet [purchased a license](http://www.transistorsoft.com/shop/products/cordova-background-geolocation), you can skip this step &mdash; the plugin is **fully functional in *DEBUG* builds without a license** so you can *try before you buy*.  You will see a Toast message "*License Validation Failure*" when your app boots &mdash; **ignore it**.
 
 ```xml
 <platform name="android">
-      <!-- background-geolocation -->
+      <!-- Cordova Background Geolocation License -->
       <config-file parent="/manifest/application" target="app/src/main/AndroidManifest.xml">
           <meta-data
-            android:name="com.transistorsoft.locationmanager.license_key"
+            android:name="com.transistorsoft.locationmanager.license"
             android:value="YOUR_LICENSE_KEY_HERE" />
       </config-file>
-      <!-- /background-geolocation -->
 </platform>
 ```
 
+### Huawei Mobile Services (HMS) Support
+
+If you've [purchased an *HMS Background Geolocation* License](https://shop.transistorsoft.com/collections/frontpage/products/huawei-background-geolocation) for installing the plugin on _Huawei_ devices without *Google Play Services* installed, add your *HMS Background Geolocation* license key:
+
+```xml
+<platform name="android">
+      <!-- Cordova Background Geolocation License -->
+      <config-file parent="/manifest/application" target="app/src/main/AndroidManifest.xml">
+          <meta-data
+            android:name="com.transistorsoft.locationmanager.license"
+            android:value="YOUR_LICENSE_KEY_HERE" />
+      </config-file>
+      <!-- HMS Background Geolocation License -->
+      <config-file parent="/manifest/application" target="app/src/main/AndroidManifest.xml">
+          <meta-data
+            android:name="com.transistorsoft.locationmanager.hms.license"
+            android:value="YOUR_HMS_LICENSE_KEY_HERE" />
+      </config-file>
+</platform>
+```
+:warning: Huawei HMS support requires `cordova-background-geolocation >= 3.11.0`.
+
+### AndroidX (`cordova-android >= 9.0.0`)
+
+It's *highly* recommended to configure your app for *Android X* when using *Cordova 10* / `cordova-android >= 9.0.0`.
+
+```xml
+<platform name="android">
+        <preference name="AndroidXEnabled" value="true" />
+        .
+        .
+        .
+</platform>
+```
+
+:warning: If you see the following error, you need to configure your app for *Android X*.
+```
+java.lang.RuntimeException: Unable to get provider com.transistorsoft.locationmanager.util.LogFileProvider: java.lang.ClassNotFoundException
+```
+
 ------------------------------------------------------------------------------------------
+
 :warning: On older version of Cordova, If you **change your license key** after building android, you might receive an error:
 ```diff
 BUILD FAILED in 1s
@@ -147,18 +195,11 @@ $ cordova platform remove android
 $ cordova platform add android
 ```
 
-##### `@variable GOOGLE_API_VERSION ["16.+"]`
+##### `@variable GOOGLE_API_VERSION ["20.+"]`
 Sets the desired version of `play-services-location` dependency.  Many other plugins require `play-services` dependencies, (eg: `cordova-plugin-googlemaps`, `phonegap-plugin-push`):  If the version of `play-services` and/or `firebase` is not aligned to the **same** version for **ALL** plugins, your build **will fail**.
 
 ```
-$ cordova plugin add cordova-background-geolocation-lt --variable GOOGLE_API_VERSION=16.0.0
-```
-
-##### `@variable APPCOMPAT_VERSION ["27.+"]`
-Sets the desired version of `com.google.android.appcompat-v7` dependency.  Many other plugins can require a different version of `appcompat-v7` dependeny:  If the version of `appcompat-v7` is not aligned to the **same** version for **ALL** plugins, your build **will fail**.  `BackgroundGeolocation` requires a minimum version of `26.1.0` due to its support for Android 8.
-
-```
-$ cordova plugin add cordova-background-geolocation-lt --variable APPCOMPAT_VERSION=27.+
+$ cordova plugin add <git-url> --variable GOOGLE_API_VERSION=20.0.0
 ```
 
 ##### `@variable OKHTTP_VERSION ["3.12.+"]`

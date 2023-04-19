@@ -1,5 +1,54 @@
 declare module "cordova-background-geolocation-lt" {
 	/**
+	* Recognized event names available as constants upon the [[BackgroundGeolocation]] class.
+	*
+	* ```javascript
+	* // eg
+	* BackgroundGeolocation.EVENT_LOCATION)
+	* > "location"
+	*
+	* BackgoundGeolocation.EVENT_MOTIONCHANGE;
+	* > "motionchange"
+	*
+	* ```
+	*
+	* | Name                                | Value     |
+	* |-------------------------------------|-----------|
+	* | [[EVENT_BOOT]] 						| `boot` |
+	* | [[EVENT_TERMINATE]] 				| `terminate` |
+	* | [[EVENT_LOCATION]] 					| `location` |
+	* | [[EVENT_MOTIONCHANGE]] 				| `motionchange` |
+	* | [[EVENT_HTTP]] 						| `http` |
+	* | [[EVENT_HEARTBEAT]] 				| `heartbeat` |
+	* | [[EVENT_PROVIDERCHANGE]] 			| `providerchange` |
+	* | [[EVENT_ACTIVITYCHANGE]] 			| `activitychange` |
+	* | [[EVENT_GEOFENCE]] 					| `geofence` |
+	* | [[EVENT_GEOFENCESCHANGE]] 			| `geofenceschange` |
+	* | [[EVENT_ENABLEDCHANGE]] 			| `enabledchange` |
+	* | [[EVENT_CONNECTIVITYCHANGE]] 		| `connectivitychange` |
+	* | [[EVENT_SCHEDULE]] 					| `schedule` |
+	* | [[EVENT_POWERSAVECHANGE]] 			| `powersavechange` |
+	* | [[EVENT_NOTIFICATIONACTION]] 		| `notificationaction` |
+	* | [[EVENT_AUTHORIZATION]] 			| `authorization` |
+	*/
+	export type Event = "boot"
+		| "terminate"
+		| "location"
+		| "motionchange"
+		| "http"
+		| "heartbeat"
+		| "providerchange"
+		| "activitychange"
+		| "geofence"
+		| "geofenceschange"
+		| "enabledchange"
+		| "connectvitychange"
+		| "schedule"
+		| "powersavechange"
+		| "notificationaction"
+		| "authorization";
+
+	/**
 	* Controls the volume of [[Config.logLevel]] log-entries recorded to database.
 	*
 	* | Label                      |
@@ -11,7 +60,7 @@ declare module "cordova-background-geolocation-lt" {
 	* | [[LOG_LEVEL_DEBUG]]   |
 	* | [[LOG_LEVEL_VERBOSE]] |
 	*/
-	type LogLevel = 0 | 1 | 2 | 3 | 4 | 5;
+	export type LogLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 	/**
 	 * Used for [[Config.desiredAccuracy]].
@@ -60,9 +109,17 @@ declare module "cordova-background-geolocation-lt" {
 	* | [[AUTHORIZATION_STATUS_RESTRICTED]]     | iOS only      |
 	* | [[AUTHORIZATION_STATUS_DENIED]]         | iOS & Android |
 	* | [[AUTHORIZATION_STATUS_ALWAYS]]         | iOS & Android |
-	* | [[AUTHORIZATION_STATUS_WHEN_IN_USE]]    | iOS only      |
+	* | [[AUTHORIZATION_STATUS_WHEN_IN_USE]]    | iOS & Android 10+ |
 	*/
 	type AuthorizationStatus = 0 | 1 | 2 | 3 | 4;
+
+	/**
+	* | Name                                    | Value     |
+	* |-----------------------------------------|-----------|
+	* | [[ACCURACY_AUTHORIZATION_FULL]] 		| 0     	|
+	* | [[ACCURACY_AUTHORIZATION_REDUCED]]     	| 1         |
+	*/
+	type AccuracyAuthorization = 0 | 1;
 
 	/**
 	* | Value    | Description                                                           |
@@ -80,9 +137,11 @@ declare module "cordova-background-geolocation-lt" {
     * | 0     | Location unknown            |
     * | 1     | Location permission denied  |
     * | 2     | Network error               |
+    * | 3     | Attempt to initiate location-services in background with WhenInUse authorization |
     * | 408   | Location timeout            |
+    * | 499   | Location request cancelled  |
 	*/
-	type LocationError = 0 | 1 | 2 | 408;
+	type LocationError = 0 | 1 | 2 | 408 | 499;
 
 	/**
 	* iOS Location authorization request.
@@ -91,7 +150,7 @@ declare module "cordova-background-geolocation-lt" {
 	type LocationAuthorizationRequest = "Always" | "WhenInUse" | "Any";
 
 	/**
-	* Desired HTTP method to use when uploading data to your configured [[url]].
+	* Desired HTTP method to use when uploading data to your configured [[Config.url]].
 	*/
 	type HttpMethod = "POST" | "PUT" | "OPTIONS";
 
@@ -109,4 +168,20 @@ declare module "cordova-background-geolocation-lt" {
 	*/
 	type SQLQueryOrder = -1 | 1;
 
+	/**
+	 * List of valid Motion-activity types
+     *
+     * | Activity Name  |
+     * |----------------|
+     * | `still`        |
+     * | `walking`      |
+     * | `on_foot`      |
+     * | `running`      |
+     * | `on_bicycle`   |
+     * | `in_vehicle`   |
+     * | `unknown` 		|
+     *
+	 * - See [[onActivityChange]] and [[Location.activity]].
+	 */
+	type MotionActivityType = "unknown" | "still" | "walking" | "on_foot" | "running" | "on_bicycle" | "in_vehicle";
 }

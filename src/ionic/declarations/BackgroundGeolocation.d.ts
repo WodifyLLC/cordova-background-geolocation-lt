@@ -23,7 +23,7 @@
 /// <reference path="interfaces/Authorization.d.ts" />
 /// <reference path="interfaces/AuthorizationEvent.d.ts" />
 /// <reference path="interfaces/TransistorAuthorizationToken.d.ts" />
-///
+/// <reference path="interfaces/Subscription.d.ts" />
 declare module "cordova-background-geolocation-lt" {
   /**
   * Primary API of the SDK.
@@ -31,8 +31,8 @@ declare module "cordova-background-geolocation-lt" {
   *
   * ## 📚 Help
   * - 📘 [Philosophy of Operation](github:wiki/Philosophy-of-Operation)
-  * - 📘 HTTP Guide: [[HttpEvent]].
-  * - 📘 Geofencing Guide:  [[Geofence]].
+  * - 📘 [[HttpEvent | HTTP Guide]].
+  * - 📘 [[Geofence | Geofencing Guide]].
   * - 📘 [Android Headless Mode](github:wiki/Android-Headless-Mode).
   * - 📘 [Debugging Guide](github:wiki/Debugging).
   *
@@ -44,7 +44,7 @@ declare module "cordova-background-geolocation-lt" {
   * |------------------------|-----------------------------------------|
   * | [[onLocation]]           | Fired with each recorded [[Location]]     |
   * | [[onMotionChange]]       | Fired when the plugin changes state between *moving* / *stationary* |
-  * | [[onHttp]]               | Fired with each HTTP response from your server.  (see [[url]]). |
+  * | [[onHttp]]               | Fired with each HTTP response from your server.  (see [[Config.url]]). |
   * | [[onActivityChange]]     | Fired with each change in device motion-activity.                    |
   * | [[onProviderChange]]     | Fired after changes to device location-services configuration.       |
   * | [[onHeartbeat]]          | Periodic timed events.  See [[heartbeatInterval]].  iOS requires [[preventSuspend]]. |
@@ -167,7 +167,24 @@ declare module "cordova-background-geolocation-lt" {
   * });
   * ```
   */
-  export default class BackgroundGeolocation {
+  export class BackgroundGeolocation {
+    static EVENT_BOOT: Event;
+    static EVENT_TERMINATE: Event;
+    static EVENT_LOCATION: Event;
+    static EVENT_MOTIONCHANGE: Event;
+    static EVENT_HTTP: Event;
+    static EVENT_HEARTBEAT: Event;
+    static EVENT_PROVIDERCHANGE: Event;
+    static EVENT_ACTIVITYCHANGE: Event;
+    static EVENT_GEOFENCE: Event;
+    static EVENT_GEOFENCESCHANGE: Event;
+    static EVENT_ENABLEDCHANGE: Event;
+    static EVENT_CONNECTIVITYCHANGE: Event;
+    static EVENT_SCHEDULE: Event;
+    static EVENT_POWERSAVECHANGE: Event;
+    static EVENT_NOTIFICATIONACTION: Event;
+    static EVENT_AUTHORIZATION: Event;
+
     static LOG_LEVEL_OFF: LogLevel;
     static LOG_LEVEL_ERROR: LogLevel;
     static LOG_LEVEL_WARNING: LogLevel;
@@ -204,6 +221,9 @@ declare module "cordova-background-geolocation-lt" {
     static PERSIST_MODE_GEOFENCE: PersistMode;
     static PERSIST_MODE_NONE: PersistMode;
 
+    static ACCURACY_AUTHORIZATION_FULL: AccuracyAuthorization;
+    static ACCURACY_AUTHORIZATION_REDUCED: AccuracyAuthorization;
+
     /**
     * [[DeviceSettings]] API
     *
@@ -233,6 +253,23 @@ declare module "cordova-background-geolocation-lt" {
     */
     static on(event: string, success:Function, failure?:Function):void;
     /**
+    * @deprecated.  Use [[Subscription]] returned from __`BackgroundGeolocation.onXXX`__ to remove listeners.
+    *
+    * @example
+    * ```typescript
+    * const subscription = BackgroundGeolocation.onLocation((location) => {
+    *   console.log('[onLocation]', location);
+    * });
+    * .
+    * .
+    * .
+    * // Remove listener
+    * subscription.remove();
+    * ```
+    *
+    * ---------------------------------------------------------------------
+    * ### ⚠️ [Deprecated]
+    *
     * Removes an event listener.  You must supply the *type* of event to remove in addition to a reference to the *exact* function you
     * used to subscribe to the event.
     *
@@ -254,7 +291,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * let locationHandler = (location) => {
+    * const locationHandler = (location) => {
     *   console.log("[location] - ", location)
     * }
     * BackgroundGeolocation.onLocation(locationHandler)
@@ -273,7 +310,9 @@ declare module "cordova-background-geolocation-lt" {
     static un(event: string, handler: Function, success?:Function, failure?:Function): void;
 
     /**
-    * Removes all event-listeners
+    * Removes all event-listeners.
+    *
+    * Calls [[Subscription.remove]] on all subscriptions.
     *
     * @example
     * ```typescript
@@ -294,7 +333,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onLocation((location) => {
+    * const subscription = BackgroundGeolocation.onLocation((location) => {
     *   console.log("[onLocation] success: ", location);
     * }, (error) => {
     *   console.log("[onLocation] ERROR: ", error);
@@ -313,7 +352,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @event location
     */
-    static onLocation(success: (location:Location)=>void, failure?:(errorCode: LocationError) => void):void;
+    static onLocation(success: (location:Location)=>void, failure?:(errorCode: LocationError) => void):Subscription;
 
     /**
     * Subscribe to Geofence transition events.
@@ -322,17 +361,17 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onGeofence((event) => {
+    * const subscription = BackgroundGeolocation.onGeofence((event) => {
     *   console.log("[onGeofence] ", event);
     * });
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     *
     * @event geofence
     */
-    static onGeofence(callback: (event: GeofenceEvent) => void):void;
+    static onGeofence(callback: (event: GeofenceEvent) => void):Subscription;
 
     /**
     * Subscribe to __`motionchange`__ events.
@@ -342,7 +381,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onMotionChange((event) => {
+    * const subscription = BackgroundGeolocation.onMotionChange((event) => {
     *   if (event.isMoving) {
     *      console.log("[onMotionChange] Device has just started MOVING ", event.location);
     *   } else {
@@ -365,14 +404,14 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @event motionchange
     */
-    static onMotionChange(callback: (event:MotionChangeEvent) => void): void;
+    static onMotionChange(callback: (event:MotionChangeEvent) => void): Subscription;
 
     /**
-    * Subscribe to HTTP responses from your server [[url]].
+    * Subscribe to HTTP responses from your server [[Config.url]].
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onHttp((response) => {
+    * const subscription = BackgroundGeolocation.onHttp((response) => {
     *   let status = response.status;
     *   let success = response.success;
     *   let responseText = response.responseText;
@@ -380,11 +419,11 @@ declare module "cordova-background-geolocation-lt" {
     * });
     * ```
     * ### ℹ️ See also:
-    *  - HTTP Guide at [[HttpEvent]].
+    *  - [[HttpEvent | HTTP Guide]]
     *
     * @event http
     */
-    static onHttp(callback: (response:HttpEvent) => void): void;
+    static onHttp(callback: (response:HttpEvent) => void): Subscription;
 
     /**
     * Subscribe to changes in motion activity.
@@ -396,13 +435,13 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onActivityChange((event) => {
+    * const subscription = BackgroundGeolocation.onActivityChange((event) => {
     *   console.log("[onActivityChange] ", event);
     * });
     * ```
     * @event activitychange
     */
-    static onActivityChange(callback: (event: MotionActivityEvent) => void): void;
+    static onActivityChange(callback: (event: MotionActivityEvent) => void): Subscription;
 
     /**
     * Subscribe to changes in device's location-services configuration / authorization.
@@ -411,7 +450,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onProviderChange((event) => {
+    * const subscription = BackgroundGeolocation.onProviderChange((event) => {
     *   console.log("[onProviderChange: ", event);
     *
     *   switch(event.status) {
@@ -439,7 +478,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @event providerchange
     */
-    static onProviderChange(callback: (event:ProviderChangeEvent) => void): void;
+    static onProviderChange(callback: (event:ProviderChangeEvent) => void): Subscription;
 
     /**
     * Subscribe to periodic heartbeat events.
@@ -449,10 +488,11 @@ declare module "cordova-background-geolocation-lt" {
     * @example
     * ```typescript
     * BackgroundGeolocation.ready({
-    *   heartbeatInterval: 60
+    *   heartbeatInterval: 60,
+    *   preventSuspend: true // <-- Required for iOS
     * });
     *
-    * BackgroundGeolocation.onHeartbeat((event) => {
+    * const subscription = BackgroundGeolocation.onHeartbeat((event) => {
     *   console.log("[onHeartbeat] ", event);
     *
     *   // You could request a new location if you wish.
@@ -469,7 +509,7 @@ declare module "cordova-background-geolocation-lt" {
     * -  The [[Location]] provided by the [[HeartbeatEvent]] is only the last-known location.  The *heartbeat* event does not actively engage location-services.  If you wish to get the current location in your `callback`, use [[getCurrentPosition]].
     * @event heartbeat
     */
-    static onHeartbeat(callback: (event: HeartbeatEvent) => void): void;
+    static onHeartbeat(callback: (event: HeartbeatEvent) => void): Subscription;
 
     /**
     * Subscribe to changes in actively monitored geofences.
@@ -488,7 +528,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onGeofencesChange((event) => {
+    * const subscription = BackgroundGeolocation.onGeofencesChange((event) => {
     *   let on = event.on;     //<-- new geofences activated.
     *   let off = event.off; //<-- geofences that were just de-activated.
     *
@@ -505,10 +545,10 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     * @event geofenceschange
     */
-    static onGeofencesChange(callback: (event: GeofencesChangeEvent) => void): void;
+    static onGeofencesChange(callback: (event: GeofencesChangeEvent) => void): Subscription;
 
     /**
     * Subscribe to [[schedule]] events.
@@ -518,7 +558,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onSchedule((state) => {
+    * const subscription = BackgroundGeolocation.onSchedule((state) => {
     *   if (state.enabled) {
     *     console.log("[onSchedule] scheduled start tracking");
     *   } else {
@@ -528,7 +568,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     * @event schedule
     */
-    static onSchedule(callback: (state:State) => void): void;
+    static onSchedule(callback: (state:State) => void): Subscription;
 
     /**
     * Subscribe to changes in network connectivity.
@@ -536,18 +576,18 @@ declare module "cordova-background-geolocation-lt" {
     * Fired when the state of the device's network-connectivity changes (enabled -> disabled and vice-versa).  By default, the plugin will automatically fire
     * a `connectivitychange` event with the current state network-connectivity whenever the [[start]] method is executed.
     *
-    * ℹ️ The SDK subscribes internally to `connectivitychange` events &mdash; if you've configured the SDK's HTTP Service (See [[HttpEvent]]) and your app has queued locations,
+    * ℹ️ The SDK subscribes internally to `connectivitychange` events &mdash; if you've configured the SDK's HTTP Service (See [[HttpEvent | HTTP Guide]]) and your app has queued locations,
     * the SDK will automatically initiate uploading to your configured [[Config.url]] when network connectivity is detected.
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onConnectivityChange((event) => {
+    * const subscription = BackgroundGeolocation.onConnectivityChange((event) => {
     *   console.log("[onConnectivityChange] ", event);
     * });
     * ```
     * @event connectivitychange
     */
-    static onConnectivityChange(callback: (event:ConnectivityChangeEvent) => void): void;
+    static onConnectivityChange(callback: (event:ConnectivityChangeEvent) => void): Subscription;
 
     /**
     * Subscribe to state changes in OS power-saving system.
@@ -572,13 +612,13 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onPowerSaveChange((isPowerSaveMode) => {
+    * const subscription = BackgroundGeolocation.onPowerSaveChange((isPowerSaveMode) => {
     *   console.log("[onPowerSaveChange: ", isPowerSaveMode);
     * });
     * ```
     * @event powersavechange
     */
-    static onPowerSaveChange(callback: (enabled:boolean) => void): void;
+    static onPowerSaveChange(callback: (enabled:boolean) => void): Subscription;
 
     /**
     * Subscribe to changes in plugin [[State.enabled]].
@@ -589,18 +629,18 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onEnabledChange(isEnabled => {
+    * const subscription = BackgroundGeolocation.onEnabledChange(isEnabled => {
     *   console.log("[onEnabledChanged] isEnabled? ", isEnabled);
     * });
     * ```
     * @event enabledchange
     */
-    static onEnabledChange(callback: (enabled:boolean) => void): void;
+    static onEnabledChange(callback: (enabled:boolean) => void): Subscription;
 
     /**
     * [__Android-only__] Subscribe to button-clicks of a custom [[Notification.layout]] on the Android foreground-service notification.
     */
-    static onNotificationAction(callback: (buttonId:string) => void): void;
+    static onNotificationAction(callback: (buttonId:string) => void): Subscription;
 
     /**
     * Subscribe to [[Authorization]] events.
@@ -612,7 +652,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.onAuthorization((event) => {
+    * const subscription = BackgroundGeolocation.onAuthorization((event) => {
     *   if (event.success) {
     *     console.log("[authorization] ERROR: ", event.error);
     *   } else {
@@ -622,7 +662,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     */
-    static onAuthorization(callback: (event:AuthorizationEvent) => void): void;
+    static onAuthorization(callback: (event:AuthorizationEvent) => void): Subscription;
 
     /**
     * Registers a Javascript callback to execute in the Android "Headless" state, where the app has been terminated configured with
@@ -636,7 +676,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * @example
     * ```typescript
-    * let BackgroundGeolocationHeadlessTask = async (event) => {
+    * const BackgroundGeolocationHeadlessTask = async (event) => {
     *   let params = event.params;
     *    console.log("[BackgroundGeolocation HeadlessTask] -", event.name, params);
     *
@@ -833,7 +873,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * ### ℹ️ See also:
     * - [[stop]]
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static startGeofences(success?:(state:State) => void, failure?:(error:string) => void): Promise<State>;
 
@@ -985,7 +1025,7 @@ declare module "cordova-background-geolocation-lt" {
     * Retrieves the current [[Location]].
     *
     * This method instructs the native code to fetch exactly one location using maximum power & accuracy.  The native code will persist the fetched location to
-    * its SQLite database just as any other location in addition to POSTing to your configured [[url]].
+    * its SQLite database just as any other location in addition to POSTing to your configured [[Config.url]].
     * If an error occurs while fetching the location, `catch` will be provided with an [[LocationError]].
     * @break
     *
@@ -1017,7 +1057,7 @@ declare module "cordova-background-geolocation-lt" {
 
     /**
     * Start a stream of continuous location-updates.  The native code will persist the fetched location to its SQLite database
-    * just as any other location (If the SDK is currently [[enabled]]) in addition to POSTing to your configured [[url]] (if you've enabled the HTTP features).
+    * just as any other location (If the SDK is currently [[State.enabled]]) in addition to POSTing to your configured [[Config.url]] (if you've enabled the HTTP features).
     *
     * ### ⚠️ Warning:
     * `watchPosition` is **not** recommended for **long term** monitoring in the background &mdash; It's primarily designed for use in the foreground **only**.  You might use it for fast-updates of the user's current position on the map, for example.
@@ -1103,18 +1143,28 @@ declare module "cordova-background-geolocation-lt" {
     */
     static destroyLocations(success?:Function, failure?:Function): Promise<void>;
 
+    /**
+    * Destroy a single location by [[Location.uuid]]
+    *
+    * @example
+    * ```typescript
+    * await BackgroundGeolocation.destroyLocation(location.uuid);
+    * ```
+    */
+    static destroyLocation(uuid:String): Promise<void>;
+
     static insertLocation(params:Location, success?:(location:Location) => void, failure?:Function): Promise<Location>;
 
     /**
-    * Manually execute upload to configured [[url]]
+    * Manually execute upload to configured [[Config.url]]
     *
-    * If the plugin is configured for HTTP with an [[url]] and [[autoSync]] `false`, the [[sync]] method will initiate POSTing the locations
-    * currently stored in the native SQLite database to your configured [[url]].  When your HTTP server returns a response of `200 OK`, that record(s)
+    * If the plugin is configured for HTTP with an [[Config.url]] and [[autoSync]] `false`, the [[sync]] method will initiate POSTing the locations
+    * currently stored in the native SQLite database to your configured [[Config.url]].  When your HTTP server returns a response of `200 OK`, that record(s)
     * in the database will be DELETED.
     *
     * If you configured [[batchSync]] `true`, all the locations will be sent to your server in a single HTTP POST request, otherwise the plugin will
     * execute an HTTP post for **each** [[Location]] in the database (REST-style).  Your callback will be executed and provided with a `List` of all the
-    * locations from the SQLite database.  If you configured the plugin for HTTP (by configuring a [[url]], your callback will be executed after all
+    * locations from the SQLite database.  If you configured the plugin for HTTP (by configuring a [[Config.url]], your callback will be executed after all
     * the HTTP request(s) have completed.  If the plugin failed to sync to your server (possibly because of no network connection), the failure callback will
     * be called with an error message.  If you are **not** using the HTTP features, [[sync]] will delete all records from its SQLite database.
     *
@@ -1127,7 +1177,7 @@ declare module "cordova-background-geolocation-lt" {
     * });
     *
     * ```
-    *  ℹ️ For more information, see the __HTTP Guide__ at [[HttpEvent]].
+    *  ℹ️ For more information, see the [[HttpEvent | HTTP Guide]]
     */
     static sync(success?:(locations:Array<Object>) => void, failure?:Function): Promise<Array<Object>>;
 
@@ -1211,7 +1261,7 @@ declare module "cordova-background-geolocation-lt" {
     * ### ℹ️ Note:
     * - If a geofence(s) *already* exists with the configured [[Geofence.identifier]], the previous one(s) will be **deleted** before the new one is inserted.
     * - When adding *multiple*, it's about **10 times faster** to use [[addGeofences]] instead.
-    * - 📘[[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
 
     static addGeofence(config:Geofence, success?:Function, failure?:(error:string) => void): Promise<void>;
@@ -1239,7 +1289,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * ### ℹ️ Note:
     * - If a geofence(s) *already* exists with the configured [[Geofence.identifier]], the previous one(s) will be **deleted** before the new one is inserted.
-    * - 📘[[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     * - [[addGeofence]]
     *
     */
@@ -1258,12 +1308,12 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static removeGeofence(identifier: string, success?: Function, failure?: Function): Promise<void>;
 
     /**
-    * Destroy all [[Geofence]].
+    * Destroy all [[Geofence]]
     *
     * @example
     * ```typescript
@@ -1271,7 +1321,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static removeGeofences(success?: Function, failure?: Function): Promise<void>;
 
@@ -1284,7 +1334,7 @@ declare module "cordova-background-geolocation-lt" {
     * console.log("[getGeofences: ", geofences);
     * ```
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static getGeofences(success?:(geofences:Array<Geofence>) => void, failure?: (error:string) => void): Promise<Array<Geofence>>;
 
@@ -1298,7 +1348,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static getGeofence(identifier:string, success?:(geofence:Geofence) => void, failure?: (error:string) => void): Promise<Geofence>;
 
@@ -1311,7 +1361,7 @@ declare module "cordova-background-geolocation-lt" {
     * console.log("[geofenceExists] ", exists);
     * ```
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]]
     */
     static geofenceExists(identifier:string, callback?:(exists:boolean) => void): Promise<boolean>;
 
@@ -1398,23 +1448,102 @@ declare module "cordova-background-geolocation-lt" {
     static getProviderState(success?:(state:ProviderChangeEvent) => void, failure?:Function): Promise<ProviderChangeEvent>;
 
     /**
-    * Initiates a location permission dialog with the user.
+    * Manually request location permission from the user with the configured [[Config.locationAuthorizationRequest]].
     *
-    * If the user has already provided authorization for location-services, your `success` callback will be executed immediately.
+    * The method will resolve successful if *either* __`WhenInUse`__ or __`Always`__ is authorized, regardless of [[Config.locationAuthorizationRequest]].  Otherwise an error will be returned (eg: user denies location permission).
+    *
+    * If the user has already provided authorization for location-services, the method will resolve successfully immediately.
+    *
+    * If iOS has *already* presented the location authorization dialog and the user has not currently authorized your desired [[Config.locationAuthorizationRequest]], the SDK will present an error dialog offering to direct the user to your app's Settings screen.
+    * - To disable this behaviour, see [[Config.disableLocationAuthorizationAlert]].
+    * - To customize the text on this dialog, see [[Config.locationAuthorizationAlert]].
     *
     * ### ⚠️ Note:
     * - The SDK will **already request permission** from the user when you execute [[start]], [[startGeofences]], [[getCurrentPosition]], etc.  You **do not need to explicitly execute this method** with typical use-cases.
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.requestPermission().then((status) => {
-    *   console.log("[requestPermission] SUCCESS");
-    * }).catch((status) => {
-    *   console.log("[requestPermission] REJECTED", status);
-    * });
+    * async componentDidMount() {
+    *   // Listen to onProviderChange to be notified when location authorization changes occur.
+    *   BackgroundGeolocation.onProviderChange((event) => {
+    *     console.log('[providerchange]', event);
+    *   });
+    *
+    *   // First ready the plugin with your configuration.
+    *   let state = await BackgroundGeolocation.ready({
+    *     locationAuthorizationRequest: 'Always'
+    *   });
+    *
+    *   // Manually request permission with configured locationAuthorizationRequest.
+    *   try {
+    *     int status = await BackgroundGeolocation.requestPermission();
+    *     console.log('[requestPermission] success: ', status);
+    *   } catch(status) {
+    *     console.warn('[requestPermission] FAILURE: ', status);
+    *   }
+    * }
     * ```
+    *
+    * ### ℹ️ See also:
+    * - [[Config.locationAuthorizationRequest]]
+    * - [[Config.disableLocationAuthorizationAlert]]
+    * - [[Config.locationAuthorizationAlert]]
+    * - [[Config.backgroundPermissionRationale]] (*Android 11+*)
+    * - [[requestTemporaryFullAccuracy]] (*iOS 14+*)
     */
     static requestPermission(success?:(status:AuthorizationStatus) => void, failure?:(status:AuthorizationStatus) => void): Promise<AuthorizationStatus>;
+
+    /**
+    * __`[iOS 14+]`__ iOS 14 has introduced a new __`[Precise: On]`__ switch on the location authorization dialog allowing users to disable high-accuracy location.
+    *
+    * The method [`requestTemporaryFullAccuracy` (Apple docs)](https://developer.apple.com/documentation/corelocation/cllocationmanager/3600217-requesttemporaryfullaccuracyauth?language=objc) will allow you to present a dialog to the user requesting temporary *full accuracy* for the lifetime of this application run (until terminate).
+    *
+    * ![](https://dl.dropbox.com/s/dj93xpg51vspqk0/ios-14-precise-on.png?dl=1)
+    *
+    * ## Configuration &mdash; `Info.plist`
+    *
+    * In order to use this method, you must configure your __`Info.plist`__ with the `Dictionary` key:
+    * __`Privacy - Location Temporary Usage Description Dictionary`__
+    *
+    * ![](https://dl.dropbox.com/s/52f5lnjc4d9g8w7/ios-14-Privacy-Location-Temporary-Usage-Description-Dictionary.png?dl=1)
+    *
+    * The keys of this `Dictionary` (eg: `Delivery`) are supplied as the first argument to the method.  The `value` will be printed on the dialog shown to the user, explaing the purpose of your request for full accuracy.
+    *
+    * If the dialog fails to be presented, an error will be thrown:
+    * - The Info.plist file doesn’t have an entry for the given purposeKey value.
+    * - The app is already authorized for full accuracy.
+    * - The app is in the background.
+    *
+    * ![](https://dl.dropbox.com/s/8cc0sniv3pvpetl/ios-14-requestTemporaryFullAccuracy.png?dl=1)
+    *
+    * __Note:__ Android and older versions of iOS `< 14` will return [[BackgroundGeolocation.ACCURACY_AUTHORIZATION_FULL]].
+    *
+    * @example
+    *
+    * ```javascript
+    * BackgroundGeolocation.onProviderChange((event) => {
+    *   if (event.accuracyAuthorization == BackgroundGeolocation.ACCURACY_AUTHORIZATION_REDUCED) {
+    *     // Supply "Purpose" key from Info.plist as 1st argument.
+    *     BackgroundGeolocation.requestTemporaryFullAccuracy("Delivery").then((accuracyAuthorization) => {
+    *       if (accuracyAuthorization == BackgroundGeolocation.ACCURACY_AUTHORIZATION_FULL) {
+    *         console.log('[requestTemporaryFullAccuracy] GRANTED: ', accuracyAuthorization);
+    *       } else {
+    *         console.log('[requestTemporaryFullAccuracy] DENIED: ', accuracyAuthorization);
+    *       }
+    *     }).catch((error) => {
+    *       console.warn("[requestTemporaryFullAccuracy] FAILED TO SHOW DIALOG: ", error);
+    *     });
+    *   }
+    * });
+    * ```
+    *
+    * __See also:__
+    * - [[ProviderChangeEvent.accuracyAuthorization]].
+    * - [What's new in iOS 14 `CoreLocation`](https://levelup.gitconnected.com/whats-new-with-corelocation-in-ios-14-bd28421c95c4)
+    *
+    */
+    static requestTemporaryFullAccuracy(purpose:string):Promise<AccuracyAuthorization>;
+
     /**
     *
     */
@@ -1488,4 +1617,5 @@ declare module "cordova-background-geolocation-lt" {
     */
     static destroyTransistorAuthorizationToken(url?:string): Promise<boolean>;
   }
+  export default BackgroundGeolocation;
 }

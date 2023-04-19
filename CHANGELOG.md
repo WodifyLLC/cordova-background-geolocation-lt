@@ -1,5 +1,362 @@
 # Change Log
 
+## 4.11.2 &mdash; 2023-04-12
+* [Android] Fix String concatenation issue on Turkish devices where method-name composed for use with reflection is in
+correctly capitalized (ie: `isMoving -> `setIsMoving` is incorrectly capitalized with Turkish capital as `setİsMoving`
+.  Simply enforce `Locale.ENGLISH` when performing `String.toUpperCase(Locale.ENGLISH)`.
+
+* [iOS] Fix bug in TSScheduler.  When schedule was cleared via .setConfig, only the State.schedulerEnabled property was set to false, but the TSScheduler singleton contained an internal 'enabled' property which was not reset to false.  Solution was to simply call stop() method upon TSScheduler singleton.
+
+## 4.11.1 &mdash; 2023-03-30
+* [Android] Bump default `hmsLocationVersion = 6.9.0.300`.  There are reports of Google rejecting apps due to older huawei HMS dependenc
+ies.
+* [Android] Fix `ClassCastException` related to Motion API error.
+
+## 4.11.0 &mdash; 2023-03-29
+* [Android] Introduce __Huawei HMS Support__.  Requires a separate license key [purchased here](https://shop.transistorsoft.com/collections/frontpage/products/huawei-background-geolocation).
+* [iOS] Fix for iOS 16.4.  iOS 16.4 introduces changes to CoreLocation behaviour when using Config.showsBackgroundLocationIndi
+cator: false.
+* [Android] Added extra logic in a location error-handler to mitigate against a possible edge-case where a location-error fetching the onMotionChange position could possibly result in an infinite loop, causing a stackoverflow exception:
+```
+at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:264)
+at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
+at com.transistorsoft.locationmanager.location.TSLocationManager.getCurrentPosition(TSLocationManager.java:3)
+at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:321)
+at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
+at com.transistorsoft.locationmanager.location.TSLocationManager.getCurrentPosition(TSLocationManager.java:3)
+at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:321)
+at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
+at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
+.
+.
+.
+```
+
+## 4.10.0 &mdash; 2023-02-01
+* [Fixed][Android] Implement support for `play-services-location v21` (`GOOGLE_API_VERSION` in the plugin Config).  The plugin can now work with either `<= v20` or `>= v21`.
+* [CHANGE] :warning: *AndroidX* is now **required**.  You must enable *AndroidXEnabled* in your `config.xml`:
+```xml
+  <platform name="android">
+    <preference name="AndroidXEnabled" value="true" />
+  </platform>
+```
+* [Changed][Android] Change default `GOOGLE_API_VERSION 20.+`.
+* [Changed][Android] Moved dependency `com.google.android.gms:play-services-location` from `plugin.xml` (using `<framework />` tag  -> plugin's own `build.gradle`.
+
+## 4.9.4 &mdash; 2023-01-19
+* [Fixed] Fixed inconsistency in API docs with `location.activity` (`location.activity.type`) and `MotionChangeEvent` provided to `onActivityChange` (`motionActivityEvent.activity`).
+* [Changed] __Android__ Update `logback-android` version.
+
+## 4.9.3 &mdash; 2022-12-12
+* [Fixed] __Android__: Catch `Fatal Exception: java.lang.IllegalArgumentException: NetworkCallback was already unregistered`
+* [Fixed] __Android__ It has been discovered that the Android logger `logback-android` has not been automatically clearing all expired records (`Config.logMaxDays`) from the log database.  The `logback-android` database consists of three tables and only *one* was being cleared (see https://github.com/tony19/logback-android/pull/214), resulting in a constantly growing database (where `logLevel > LOG_LEVEL_OFF`).  This version of the plugin will alter the `logback-android` database tables with `ON DELETE CASCADE` to ensure all log-data is properly removed.
+* [Added] Added two new *HTTP RPC* commands `stopSchedule` and `startSchedule` (See API docs *HTTP Guide* for more information).
+
+## 4.9.2 &mdash; 2022-10-26
+* [Android] Fix logic error with `getCurrentPosition` not respecting `timeout`.
+* [iOS] Fix bug in iOS scheduler firing on days where it should not.
+* [iOS] Rebuild `TSLocationManager.xcframework` with *XCode 13* (instead of *XCode 14*).
+* [Android] Add new Config `Notification.channelId` for custom customizing the `NotificationChannel` id.  Some use
+rs have an existing foreground-service and `NotificationChannel` so wish to have the plugin's foreground-service
+s share the same notification and channel.  This option should generally not be used.
+* [Android] Add permission `android.permission.POST_NOTIFICATIONS` for Android 13 (targetSdkVersion 33).  Requ
+ired to allow enabling notifications in Settings->Apps.
+* [Android] Add new Config option `Authorization.refreshHeaders` for full control over HTTP headers sent to `Author
+ization.refreshUrl` when refreshing auth token.
+* [Android] Add `null` check when executing `PowerManager.isPowerSaveMode()`.`
+* [Android] Add new `Config.disableProviderChangeRecord (default false)` to allow disabling the automatical HTTP POST of the `onProviderChange` location record.  Some users do not want this automatically uploaded locatio
+n whenever the state of location-services is changed (eg: Location-services disabled, Airplane mode, etc).
+* [Android] Fix bug with `disableMotionActivityUpdates: true` and calling `.start()` followed immediately by `.changePace(true)`.  The SDK would fail to enter the moving state, entering the stationary state instead.
+* Add new iOS 15 `CLLocation` attribute `Location.ellipsoidal_altitude` *The altitude as a height above the World Geodetic System 1984 (WGS84) ellipsoid, measured in meters*.  Android `Location.altitude` has always returned *ellipsoidal altutude*, so both `Location.altitude` and `Location.ellipsoidal_altitude` will return the same value.
+
+## 4.8.1 &mdash; 2022-08-08
+* [Android] Fix `java.lang.IllegalArgumentException `TSProviderManager.handleProviderChangeEvent`.
+* [Android] `startOnBoot: false` with `stopOnTerminate: false` could start-on-boot.
+* [Android] `State.enabled` returned by calling `.stop()` returns `true` due to implementation running in a background-thread but `callback` executed immediately on the main-thread.  However, requesting `.getState()` immediately after calling `.stop` *would* return the correct value of `State.enabled`
+* [Android] Fix `notification.sticky` not being respected.
+
+## 4.8.0 &mdash; 2022-06-21
+* [Android] Fix bug in `onProviderChange` event:  not properly detecting when location-services disabled.
+* [Android] __Android 12__:  Guard `Context.startForegroundService` with `try / catch`: the plugin will now catch exception `ForegroundServiceStartNotAllowedException` and automatically retry with an `AlarmManager` *oneShot* event.
+* [Android] __Android 12__: Refactor foreground-service management for Android 12:  A way has been found to restore the traditional behaviour of foreground-services, allowing them to stop when no longer required (eg: where the plugin is in the stationary state).
+* [Android] Refactor application life-cycle management.  Remove deprecated permission `android.permission.GET_TASKS` traditionally used for detecting when the app has been terminated.  The new life-cycle mgmt system can detect Android headless-mode in a much more elegant manner.
+* [Android] Better handling for `WhenInUse` behaviour:  The plugin will not allow `.changePace(true)` to be executed when the app is in the background (since Android forbids location-services to initiated in the background with `WhenInUse`).
+* [Android] Refactor `useSignificantChangesOnly` behaviour.  Will use a default `motionTriggerDelay` with minimum 60000ms, minimum `distanceFilter: 250` and enforced `stopTimeout: 20`.
+* [iOS] iOS 15 has finally implemented *Mock Location Detection*.  `location.mock` will now be present for iOS when the location is mocked, just like Android.
+
+## 4.7.2 &mdash; 2022-05-27
+* [Android] Fix bug in Android 12 support for executing `.start()` in background while terminated.  Used `JobScheduler` ONESHOT instead of `AlarmManager`.
+* [Android] Plugin could be placed into an infinite loop requesting motionchange position in some cases.
+* [Android] Address `ConcurrentModificationException` in `onPermissionGranted`.
+
+## 4.7.1 &mdash; 2022-05-12
+* [Android] If on device reboot location-services fails to provide a location (eg: timeout, airplane mode), the plugin would rely on motion API events to try again.  This is a problem if the motion api is disabled.  Instead, the SDK will keep trying to retrieve a location.
+* [Android] Android 12 support for `ForegroundServiceStartNotAllowedException`:  immediately launch the SDK's `TrackingService` as soon as `.start()` executes.  If a location-timeout occurs while fetching the onMotionChange position after device reboot with `startOnBoot: true`, the `ForegroundServiceStartNotAllowedException` could be raised.
+* [Android] Add two new attributes `android:enabled` and `android:permission` to the SDK's built-in `BootReceiver`:
+```xml
+<receiver android:name="com.transistorsoft.locationmanager.BootReceiver" android:enabled="true" android:exported="false" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+```
+* [Android] Android 12 support for executing `.start()` and `.getCurrentPosition()` while the plugin is disabled and in the background.  This is a bypass of new Android 12 restrictions for starting foreground-services in the background by taking advantage of AlarmManager.
+```
+Fatal Exception: android.app.ForegroundServiceStartNotAllowedException: startForegroundService() not allowed due to mAllowStartForeground false: service
+```
+* [Android] Added two new `androidx.lifecycle` dependencies to plugin's `build.gradle`.
+- `"androidx.lifecycle:lifecycle-runtime"`
+- `"androidx.lifecycle:lifecycle-extensions"`
+
+## 4.6.0 &mdash; 2022-04-29
+* Bump cordova-plugin-background-fetch version -> 7.1.1
+* [Android] Add a few extra manufacturer-specific `Intent` for `DeviceSettings.showPowerManager()`.
+* [Android] Minimum `compileSdkVersion 31` is now required.
+* [Android] Now that a minimum `targetSdkVersion 29` is required to release an Android app to *Play Store*, the SDK's `AndroidManifest` now automatically applies `android:foregroundServiceType="location"` to all required `Service` declarations.  You no longer need to manually provide overrides in your own `AndroidManifest`, ie:
+```diff
+<manifest>
+    <application>
+-       <service android:name="com.transistorsoft.locationmanager.service.TrackingService" android:foregroundServiceType="location" />
+-       <service android:name="com.transistorsoft.locationmanager.service.LocationRequestService" android:foregroundServiceType="location" />
+    </application>
+</manifest>
+```
+* [Android] Upgrade `android-permissions` dependency from 0.1.8 -> 2.1.6.
+* [iOS] Rebuild `TSLocationManager.xcframework` with XCode 13.3
+
+## 4.4.2 &mdash; 2022-03-29
+* [Android] While testing adding 20k geofences, the Logger can cause an `OutOfMemory` error.  Define a dedicated thread executor `Executors.newFixedThreadPool(2)` for posting log messages in background.
+* [iOS] remote event-listeners in onAppTerminate to prevent onEnabledChange event being fired in a dying app configured for `stopOnTerminate: true`
+
+# 4.4.1 &mdash; 2022-01-20
+* [Fixed][iOS] Regression bug in iOS SAS authorization strategy
+* [Fixed][Android] Android logger defaulting to LOG_LEVEL_VERBOSE when initially launched configured for LOG_LEVEL_OFF
+* [Changed][iOS] Rebuild with latest XCode `13.2.1`
+
+## 4.4.0 &mdash; 2021-10-29
+* [Added] New `Authorization.strategy "SAS"` (alternative to default `JWT`).
+* [Changed] **Deprecated** `BackgroundGeolocation.removeListener`.  All event-handlers now return a `Subscription` instance containing a `.remove()` method.  You will keep track of your own `subscription` instances and call `.remove()` upon them when you wish to remove an event listener.  Eg:
+
+```javascript
+/// OLD
+const onLocation = (location) => {
+    console.log('[onLocation');
+}
+BackgroundGeolocation.onLocation(onLocation);
+...
+// deprecated: removeListener
+BackgroundGeolocation.removeListener('location', onLocation);
+
+/// NEW:  capture returned subscription instance.
+const onLocationSubscription = BackgroundGeolocation.onLocation(onLocation);
+...
+// Removing an event-listener.
+onLocationSubscription.remove();
+```
+
+## 4.3.0 &mdash; 2021-09-13
+* [Added][Android] Implement new Android 12 "reduced accuracy" mechanism`requestTemporaryFullAccuracy`.
+* [Fixed][iOS] `Authorization.refreshPayload refreshToken` was not performing a String replace on the `{refreshToken}` template, instead over-writing the entire string.  Eg:  if provided with `'refresh_token': 'Bearer {refreshToken}`, `Bearer ` would be over-written and replaced with only the refresh-token.
+* [Fixed][Android] Fixed crash reported by Huawei device, where verticalAccuracy returns NaN.
+* [Fixed][iOS] add config change listeners for `heartbeatInterval` and `preventSuspend` to dynamically update interval when changed with `setConfig`.
+774
+* [Changed][Android] Update Android default `okhttp` version to `3.12.+`.
+* [Changed][Android] Update Android `eventbus` to `3.2.0`.
+* [Changed][iOS] Re-compile iOS `TSLocationManager` using XCode 12.4 instead of `12.5.1`.
+* [Fixed][Android] Fix an edge-case requesting motion permission.  If `getCurrentPosition()` is executed before `.start()`, the Android SDK fails to request motion permission.
+
+## 4.1.3 &mdash; 2021-07-26
+* [Fixed][Android] Add dependency `localbroadcastmanager` when using AndroidX.
+* [Changed][Android] Load Android dependency `android-permissions` from MavenCentral instead of deprecated jCenter.
+
+## 4.1.2 &mdash; 2021-06-22
+* [Changed][Android] Update okhttp default version from `3.12.+` -> `3.14.+`.  Bump `play-services-lo
+cation:16.+` -> `18.+`
+
+## 4.1.1 &mdash; 2021-06-11
+* [Fixed][iOS] Reports 2 reports of iOS crash `NSInvalidArgumentException (TSLocation.m line 178)` with iOS 14
+.x.  Wrap JSON serialization in @try/@catch block.  iOS JSON serialization docs state the supplied NSError err
+or ref should report problems but it seems this is only "sometimes" now.
+
+## 4.1.0 &mdash; 2021-06-07
+* [Added] Add typescript constants for plugin events, eg: `BackgroundGeolocation.EVENT_MOTIONCHANGE`.
+- [Changed] `Config.authorization` will perform regexp on the received response, searching for keys such as `accessToken`, `access_token`, `refreshToken`, `refresh_token`.
+- [Fixed][Android] Fix threading issue `ConcurrentMmodificationException` in `TSConfig`
+- [Fixed][Android] Don't synchronize access to ThreadPool.  Addresses ANR issues
+- [Fixed][Android] Implmementing State.didDeviceReboot in previous version introduced a source of ANR due time required to generate and persist JSON Config.  Solution is to simply perform in Background-thread.
+
+## 4.0.2 &mdash; 2021-05-25
+* [Fixed][Android] Fix failure to detect Capacitor 3 projects with capacitor.config.ts instead of expected capacitor.config.json
+
+## 4.0.1 &mdash; 2021-03-25
+
+* [Changed] Re-generate docs with latest typedoc.  The docs search feature now actually works.
+* [Changed][iOS] Update `pod CocoaLumberjack` to latest `~> 3.7.0`.
+
+## 4.0.0 &mdash; 2021-03-09
+
+* [Changed][iOS] Migrate `TSLocationManager.framework` to new `.xcframework` for *MacCatalyst* support with new Apple silcon.
+
+### :warning: Breaking Change:  Requires `cocoapods >= 1.10+`.
+
+*iOS'* new `.xcframework` requires *cocoapods >= 1.10+*:
+
+```console
+$ pod --version
+// if < 1.10.0
+$ sudo gem install cocoapods
+```
+
+### :warning: Breaking Change: `cordova-plugin-background-fetch`.
+
+- See [Breaking Changes with `cordova-plugin-background-fetch@7.0.0`](https://github.com/transistorsoft/cordova-plugin-background-fetch/blob/master/CHANGELOG.md#701--2021-02-18)
+
+## 3.10.0 &mdash; 2020-11-26
+- [Changed] Remove `Config.encrypt` feature.  This feature has always been flagging a Security Issue with Google Play Console and now the iOS `TSLocationManager` is being flagged for a virus by *Avast* *MacOS:Pirrit-CS[PUP]*.  This seems to be a false-positive due to importing [RNCryptor](https://github.com/RNCryptor/RNCryptor) package.
+
+## 3.9.4 &mdash; 2020-11-06
+
+- [Fixed][iOS] Fix issue with iOS buffer-timer with requestPermission.  Could execute callback twice.
+- [Fixed][iOS] When requesting `WhenInUse` location permission, if user grants "Allow Once" then you attempt to upgrade to `Always`, iOS simply does nothing and the `requestPermission` callback would not be called.  Implemented a `500ms` buffer timer to detect if the iOS showed a system dialog (signalled by the firing of `WillResignActive` life-cycle notification).  If the app does *not* `WillResignActive`, the buffer timer will fire, causing the callback to `requestPermission` to fire.
+- [Fixed][Android] Issue with `requestPermission` not showing `backgroundPermissionRationale` dialog on `targetSdkVersion 29` when using `locationAuthorizationRequest: 'WhenInUse'` followed by upgrade to `Always`.
+- [Added] Added two new `Location.coords` attributes `speed_accuracy` and `heading_accuracy`.
+- [Fixed][iOS] fix bug providing wrong Array of records to `sync` method when no HTTP service is configured.
+- [Fixed][Android] Add extra logic for `isMainActivityActive` to detect when `TSLocationManagerActivity` is active.
+
+## 3.9.2 &mdash; 2020-10-02
+
+- [Added][Android] Added special mechanism for *Capacitor* to allow for *Android Headless Mode*.  See the updated Setup instructions in the Wiki.
+- [Fixed][Android] `isMainActivityActive` reported incorrect results for Android apps configured with "product flavors".  This would cause the SDK to fail to recognize app is in "headless" state and fail to transmit headless events.
+- [Added][Android] _Android 11_, `targetSdkVersion 30` support for new Android background location permission with new `Config.backgroundLocationRationale`.  Android 11 has [changed location authorization](https://developer.android.com/preview/privacy/location) and no longer offers the __`[Allow all the time]`__ button on the location authorization dialog.  Instead, Android now offers a hook to present a custom dialog to the user where you will explain exactly why you require _"Allow all the time"_ location permission.  This dialog can forward the user directly to your application's __Location Permissions__ screen, where the user must *explicity* authorize __`[Allow all the time]`__.  The Background Geolocation SDK will present this dialog, which can be customized with `Config.backgroundPermissionRationale`.
+
+```javascript
+BackgroundGeolocation.ready({
+  locationAuthorizationRequest: 'Always',
+  backgroundPermissionRationale: {
+    title: "Allow access to this device's location in the background?",
+    message: "In order to allow X, Y and Z in the background, please enable 'Allow all the time' permission",
+    positiveAction: "Change to Allow all the time",
+    negativeAction: "Cancel"
+  }
+});
+```
+![](https://dl.dropbox.com/s/343nbrzpaavfser/android11-location-authorization-rn.gif?dl=1)
+
+- [Fixed][iOS] Add intelligence to iOS preventSuspend logic to determine distance from stationaryLocation using configured stationaryRadius rather than calculated based upon accuracy of stationaryLocation.  If a stationaryLocation were recorded having a poor accuracy (eg: 1000), the device would have to walk at least 1000 meters before preventSuspend would engage tracking-state.
+- [Fixed][Android] Android LocationRequestService, used for getCurrentPosition and motionChange position, could remain running after entering stationary state if a LocationAvailability event was received before the service was shut down.
+- [Fixed][iOS] Ignore didChangeAuthorizationStatus events when disabled and no requestPermissionCallback exists.  The plugin could possibly respond to 3rd-party permission plugin events.
+
+## 3.9.0 &mdash; 2020-08-20
+
+- [Added][iOS] iOS 14 introduces a new switch on the initial location authorization dialog, allowing the user to "disable precise location".  In support of this, a new method `BackgroundGeolocation.requestTemporaryFullAccuracy` has been added for requesting the user enable "temporary high accuracy" (until the next launch of your app), in addition to a new attribute `ProviderChangeEvent.accuracyAuthorization` for learning its state in the event `onProviderChange`:
+![](https://dl.dropbox.com/s/dj93xpg51vspqk0/ios-14-precise-on.png?dl=1)
+
+```javascript
+BackgroundGeolocation.onProviderChange((event) => {
+  print("[providerchange]", event);
+  // Did the user disable precise locadtion in iOS 14+?
+  if (event.accuracyAuthorization == BackgroundGeolocation.ACCURACY_AUTHORIZATION_REDUCED) {
+    // Supply "Purpose" key from Info.plist as 1st argument.
+    BackgroundGeolocation.requestTemporaryFullAccuracy("DemoPurpose").then((accuracyAuthorization) => {
+      if (accuracyAuthorization == BackgroundGeolocation.ACCURACY_AUTHORIZATION_FULL) {
+        console.log("[requestTemporaryFullAccuracy] GRANTED:", accuracyAuthorization);
+      } else {
+        console.log("[requestTemporaryFullAccuracy] DENIED:", accuracyAuthorization);
+      }
+    }).catch((error) => {
+      console.log("[requestTemporaryFullAccuracy] FAILED TO SHOW DIALOG:", error);
+    });
+  }
+}
+```
+These changes are fully compatible with Android, which will always return `BackgroundGeolocation.ACCURACY_AUTHORIZATION_FULL`
+
+- [Added][Android] Add `onChange` listener for `config.locationAuthorizationRequest` to request location-authorization.
+- [Changed][iOS] If `locationAuthorizationRequest == 'WhenInUse'` and the user has granted the higher level of `Always` authorization, do not show `locationAuthorizationAlert`.
+- [Added][iOS] Apple has changed the behaviour of location authorization &mdash; if an app initially requests `When In Use` location authorization then later requests `Always` authorization, iOS will *immediately* show the authorization upgrade dialog (`[Keep using When in Use`] / `[Change to Always allow]`).
+
+__Example__
+```javascript
+onDeviceReady() {
+  BackgroundGeolocation.ready({
+    locationAuthorizationRequest: 'WhenInUse',
+    .
+    .
+    .
+  });
+}
+
+async onClickStartTracking() {
+  await BackgroundGeolocation.start();
+
+  //
+  // some time later -- could be immediately after, hours later, days later, etc.
+  //
+  // Simply update `locationAuthorizationRequest` to "Always" -- the SDK will cause iOS to automatically show the authorization upgrade dialog.
+  BackgroundGeolocation.setConfig({
+    locationAuthorizationRequest: 'Always'
+  });
+}
+```
+
+![](https://dl.dropbox.com/s/0alq10i4pcm2o9q/ios-when-in-use-to-always-CHANGELOG.gif?dl=1)
+
+## 3.8.2 - 2020-07-23
+[Fixed] Modify `plugin.xml` to copy android `libs` to `platforms/android/libs` rather than referencing from `/plugins/src/android/libs` -- this was not possible with *PhoneGap Build*.
+[Fixed][iOS] when `getCurrentPosition` is provided with `extras`, those `extras` overwrite any configured `Config.extras` rather than merging.
+[Fixed][Android] When cancelling Alarms, use `FLAG_UPDATE_CURRENT` instead of `FLAG_CANCEL_CURRENT` -- there are [reports](https://stackoverflow.com/questions/29344971/java-lang-securityexception-too-many-alarms-500-registered-from-pid-10790-u) of older Samsung devices failing to garbadge-collect Alarms, causing the number of alarms to exceed maximum 500, generating an exception.
+
+## 3.8.1 - 2020-07-13
+- [Added][Android] New Config option `Notification.sticky` (default `false`) for allowing the Android foreground-service notification to be always shown.  The default behavior is the only show the notification when the SDK is in the *moving* state, but Some developers have expressed the need to provide full disclosure to their users when the SDK is enabled, regardless if the device is stationary with location-services OFF.
+- [Fixed][iOS] Geofence `EXIT` sometimes not firing when using `notifyOnDwell`.
+- [Fixed][Javascript] @kbrownlees found typescript in `TransistorAuthorizationToken` causing old browsers to crash, defining a function as `foo()` vs `foo: function()`.
+- [Changed][Android] Refactor geofencing-only mode to not initiate "Infinite Geofencing" when the total number of added geofences is `< 99` (the maximum number of simultaneous geofences that can be monitored on Android).  This prevents the SDK from periodically requesting location to query "geofences within `geofenceProximityRadius`".  iOS already has this behaviour (where its maximum simultaneous geofences is `19`).
+- [Fixed][iOS] When using `#ready` with `reset: true` (the default), and `autoSync: false`, the SDK could initiate HTTP service if any records exist within plugin's SQLite database, since `reset: true` causes `autoSync: true` for a fraction of a millisecond, initiating the HTTP Service.
+- [Fixed][Android] `onConnectivityChange` can report incorrect value for `enabled` when toggling between Wifi Off / Airplane mode.
+
+## 3.7.0 - 2020-05-28
+
+- [Fixed][Android] `onGeofence` event-handler fails to be fired when `maxRecordsToPersist: 0`.
+- [Fixed][Android] `requestPermission` method was always returning `AUTHORIZATION_STATUS_ALWAYS` even when *When in Use* was selected.
+- [Fixed][iOS] When using `disableStopDetection: true` with `pausesLocationUpdatesAutomatically: true`, the `CLLocationManagerDelegate didPauseLocationUpdates` fired a `motionchange` with `isMoving: true` (should be `false`).
+- [Fixed][Android] Capacitor `build.gradle` issue.  When building with 3rd-party build-service, the gradle file could fail to detect Capacitor apps due to unexpected result of `$userDir` variable.  Fixed by detecting Capacitor relative to `$projectDir` instead (Thanks to @soleary1222).  Fixes [issue](https://github.com/transistorsoft/cordova-background-geolocation-lt/issues/1123).
+- [Fixed][Android] Fix `@UIThread` issue executing location error handler on background-thread.
+- [Changed][Android] Gradle import `tslocationmanager.aar` using `api` rather than `implementation` in order to allow overrides in `AndroidManifest.xml`.
+- [Fixed][iOS] When upgrading from a version previous `<3.4.0`, if any records exist within plugin's SQLite database, those records could fail to be properly migrated to new schema.
+- [Added] Implement `BackgroundGeolocation.destroyLocation(uuid)` for destroying single location by uuid.
+- [Added] New method `BackgroundGeolocation.destroyLocation(uuid)` for destroying a single location by `Location.uuid`.
+- [Fixed] Allow firebase-adapter to validate license flavors on same key (eg: .development, .staging).
+- [Fixed] iOS geofence listeners on `onGeofence` method *could possibly* fail to be called when a geofence event causes iOS to re-launch the app in the background (this would **not** prevent the plugin posting the geofence event to your `Config.url`, only a failure of the Javascript `onGeofence` to be fired).
+- [Changed] Android library `tslocationmanager.aar` is now compiled using `androidx`.  For backwards-compatibility with those how haven't migrated to `androidX`, a *reverse-jetified* build is included.  Usage is detected automatically based upon `android.useAndroidX` in one's `gradle.properties`.
+
+## 3.6.3 - 2020-04-15
+- [Fixed][Android] Fix breaking gradle configuration change for Capacitor 2.0.  See new [Capacitor Setup](./help/INSTALL_CAPACITOR.md#android).
+
+## 3.6.2 - 2020-04-08
+- [Added] [Android] Add new `Config.motionTriggerDelay (milliseconds)` for preventing false-positive triggering of location-tracking (while walking around one's house, for example).  If the motion API triggers back to `still` before `motionTriggerDelay` expires, triggering to the *moving* state will be cancelled.
+- [Fixed] Address issue with rare reports of iOS crashing with error referencing `SOMotionDetector.m`.
+- [Fixed] Odometer issue with Android/iOS:  Do not persist `lastOdometerLocation` when plugin is disabled.
+- [Added] iOS `Config.showsBackgroundLocationIndicator`, A Boolean indicating whether the status bar changes its appearance when an app uses location services in the background.
+- [Changed] `cordova-plugin-background-fetch` dependency updated to `3.x` with new iOS 13 `BGTaskScheduler` API.
+- [Fixed] `synchronize` methods in `TSLocationManager` to address Android NPE related to `buildTSLocation`.
+- [Fixed] Typescript declaration for `Location.isMoving` should be `Location.is_moving`.
+- [Fixed] iOS:  Bug in `accessToken` RegExp in Authorization token-refresh handler.
+- [Fixed] Part of the raw Javascript API contained typescript, which would cause an error on older mobile browser versions.
+- [Added] Implement four new RPC commands `addGeofence`, `removeGeofence`, `addGeofences`, `removeGeofences`.  Document available RPC commands in "HttpGuide".
+- [Fixed] Android: launch-Intent for foreground-service notification was causing notification-click to re-launch the Activity rather than show existing.
+- [Changed] Android: Modify behaviour of geofences-only mode to not periodically request location-updates.  Will use a stationary-geofence of radius geofenceProximityRadius/2 as a trigger to re-evaluate geofences in proximity.
+- [Changed] iOS: Prefix FMDB method-names `databasePool` -> `ts_databasePool` after reports of apps being falsely rejected by Apple for "private API usage".
+- [Fixed] Android: Ensure that `location.hasSpeed()` before attempting to use it for distanceFilter elasticity calculations.  There was a report of a Device returning `Nan` for speed.
+- [Fixed] Android:  Do not throttle http requests after http connect failure when configured with `maxRecordsToPersist`.
+- [Fixed] Android: Respect `disableLocationAuthorizationAlert` for all cases, including `getCurrentPosition`.
+- [Changed] Android: Modify behaviour of geofences-only mode to not periodically request location-updates.  Will use a stationary-geofence of radius geofenceProximityRadius/2 as a trigger to re-evaluate geofences in proximity.
+- [Changed] Authorization `refreshUrl` will post as application/x-www-form-urlencoded instead of form/multipart
+- [Changed] iOS geofencing mode will not engage Significant Location Changes API when total geofence count <= 18 in order to prevent new iOS 13 "Location summary" popup from showing frequent location access.
+- [Fixed] Android:  Add hack for older devices to fix "GPS Week Rollover" bug where incorrect timestamp is recorded from GPS (typically where year is older by 20 years).
+- [Fixed] When determining geofences within `geofenceProximityRadius`, add the `location.accuracy` as a buffer against low-accuracy locations.
+- [Changed] Increase default `geofenceProximityRadius: 2000`.
+
 ## 3.4.2 - 2019-12-03
 - [Fixed] iOS crash when launching first time `-[__NSDictionaryM setObject:forKey:]: object cannot be nil (key: authorization)'`
 - [Changed] Remove Android warning `In order to enable encryption, you must provide the com.transistorsoft.locationmanager.ENCRYPTION_PASSWORD` when using `encrypt: false`.

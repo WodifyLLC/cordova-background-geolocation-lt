@@ -1,167 +1,275 @@
 var plugin = function () {
     return window.BackgroundGeolocation;
 };
+var Events = {
+    BOOT: "boot",
+    TERMINATE: "terminate",
+    LOCATION: "location",
+    HTTP: "http",
+    MOTIONCHANGE: "motionchange",
+    PROVIDERCHANGE: "providerchange",
+    HEARTBEAT: "heartbeat",
+    ACTIVITYCHANGE: "activitychange",
+    GEOFENCE: "geofence",
+    GEOFENCESCHANGE: "geofenceschange",
+    SCHEDULE: "schedule",
+    CONNECTIVITYCHANGE: "connectivitychange",
+    ENABLEDCHANGE: "enabledchange",
+    POWERSAVECHANGE: "powersavechange",
+    NOTIFICATIONACTION: "notificationaction",
+    AUTHORIZATION: "authorization",
+};
 var BackgroundGeolocation = /** @class */ (function () {
     function BackgroundGeolocation() {
     }
+    Object.defineProperty(BackgroundGeolocation, "EVENT_BOOT", {
+        get: function () { return Events.BOOT; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_TERMINATE", {
+        get: function () { return Events.TERMINATE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_LOCATION", {
+        get: function () { return Events.LOCATION; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_MOTIONCHANGE", {
+        get: function () { return Events.MOTIONCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_HTTP", {
+        get: function () { return Events.HTTP; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_HEARTBEAT", {
+        get: function () { return Events.HEARTBEAT; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_PROVIDERCHANGE", {
+        get: function () { return Events.PROVIDERCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_ACTIVITYCHANGE", {
+        get: function () { return Events.ACTIVITYCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_GEOFENCE", {
+        get: function () { return Events.GEOFENCE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_GEOFENCESCHANGE", {
+        get: function () { return Events.GEOFENCESCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_ENABLEDCHANGE", {
+        get: function () { return Events.ENABLEDCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_CONNECTIVITYCHANGE", {
+        get: function () { return Events.CONNECTIVITYCHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_SCHEDULE", {
+        get: function () { return Events.SCHEDULE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_POWERSAVECHANGE", {
+        get: function () { return Events.POWERSAVECHANGE; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_NOTIFICATIONACTION", {
+        get: function () { return Events.NOTIFICATIONACTION; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "EVENT_AUTHORIZATION", {
+        get: function () { return Events.AUTHORIZATION; },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_OFF", {
         get: function () { return plugin().LOG_LEVEL_OFF; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_ERROR", {
         get: function () { return plugin().LOG_LEVEL_ERROR; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_WARNING", {
         get: function () { return plugin().LOG_LEVEL_WARNING; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_INFO", {
         get: function () { return plugin().LOG_LEVEL_INFO; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_DEBUG", {
         get: function () { return plugin().LOG_LEVEL_DEBUG; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "LOG_LEVEL_VERBOSE", {
         get: function () { return plugin().LOG_LEVEL_VERBOSE; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_NAVIGATION", {
         get: function () { return plugin().DESIRED_ACCURACY_NAVIGATION; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_HIGH", {
         get: function () { return plugin().DESIRED_ACCURACY_HIGH; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_MEDIUM", {
         get: function () { return plugin().DESIRED_ACCURACY_MEDIUM; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_LOW", {
         get: function () { return plugin().DESIRED_ACCURACY_LOW; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_VERY_LOW", {
         get: function () { return plugin().DESIRED_ACCURACY_VERY_LOW; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "DESIRED_ACCURACY_THREE_KILOMETER", {
         get: function () { return plugin().DESIRED_ACCURACY_THREE_KILOMETER; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "AUTHORIZATION_STATUS_NOT_DETERMINED", {
         get: function () { return plugin().AUTHORIZATION_STATUS_NOT_DETERMINED; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "AUTHORIZATION_STATUS_RESTRICTED", {
         get: function () { return plugin().AUTHORIZATION_STATUS_RESTRICTED; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "AUTHORIZATION_STATUS_DENIED", {
         get: function () { return plugin().AUTHORIZATION_STATUS_DENIED; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "AUTHORIZATION_STATUS_ALWAYS", {
         get: function () { return plugin().AUTHORIZATION_STATUS_ALWAYS; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "AUTHORIZATION_STATUS_WHEN_IN_USE", {
         get: function () { return plugin().AUTHORIZATION_STATUS_WHEN_IN_USE; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "NOTIFICATION_PRIORITY_DEFAULT", {
         get: function () { return plugin().NOTIFICATION_PRIORITY_DEFAULT; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "NOTIFICATION_PRIORITY_HIGH", {
         get: function () { return plugin().NOTIFICATION_PRIORITY_HIGH; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "NOTIFICATION_PRIORITY_LOW", {
         get: function () { return plugin().NOTIFICATION_PRIORITY_LOW; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "NOTIFICATION_PRIORITY_MAX", {
         get: function () { return plugin().NOTIFICATION_PRIORITY_MAX; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "NOTIFICATION_PRIORITY_MIN", {
         get: function () { return plugin().NOTIFICATION_PRIORITY_MIN; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "ACTIVITY_TYPE_OTHER", {
         get: function () { return plugin().ACTIVITY_TYPE_OTHER; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "ACTIVITY_TYPE_AUTOMOTIVE_NAVIGATION", {
         get: function () { return plugin().ACTIVITY_TYPE_AUTOMOTIVE_NAVIGATION; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "ACTIVITY_TYPE_FITNESS", {
         get: function () { return plugin().ACTIVITY_TYPE_FITNESS; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "ACTIVITY_TYPE_OTHER_NAVIGATION", {
         get: function () { return plugin().ACTIVITY_TYPE_OTHER_NAVIGATION; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "PERSIST_MODE_ALL", {
         get: function () { return plugin().PERSIST_MODE_ALL; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "PERSIST_MODE_LOCATION", {
         get: function () { return plugin().PERSIST_MODE_LOCATION; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "PERSIST_MODE_GEOFENCE", {
         get: function () { return plugin().PERSIST_MODE_GEOFENCE; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "PERSIST_MODE_NONE", {
         get: function () { return plugin().PERSIST_MODE_NONE; },
-        enumerable: true,
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "ACCURACY_AUTHORIZATION_FULL", {
+        get: function () { return plugin().ACCURACY_AUTHORIZATION_FULL; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BackgroundGeolocation, "ACCURACY_AUTHORIZATION_REDUCED", {
+        get: function () { return plugin().ACCURACY_AUTHORIZATION_REDUCED; },
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "logger", {
         get: function () { return plugin().logger; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(BackgroundGeolocation, "deviceSettings", {
         get: function () { return plugin().deviceSettings; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     BackgroundGeolocation.ready = function (config, success, failure) {
@@ -178,59 +286,59 @@ var BackgroundGeolocation = /** @class */ (function () {
     };
     BackgroundGeolocation.onLocation = function (success, failure) {
         var bgGeo = plugin();
-        bgGeo.onLocation.apply(bgGeo, arguments);
+        return bgGeo.onLocation.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onMotionChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onMotionChange.apply(bgGeo, arguments);
+        return bgGeo.onMotionChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onHttp = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onHttp.apply(bgGeo, arguments);
+        return bgGeo.onHttp.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onHeartbeat = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onHeartbeat.apply(bgGeo, arguments);
+        return bgGeo.onHeartbeat.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onProviderChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onProviderChange.apply(bgGeo, arguments);
+        return bgGeo.onProviderChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onActivityChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onActivityChange.apply(bgGeo, arguments);
+        return bgGeo.onActivityChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onGeofence = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onGeofence.apply(bgGeo, arguments);
+        return bgGeo.onGeofence.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onGeofencesChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onGeofencesChange.apply(bgGeo, arguments);
+        return bgGeo.onGeofencesChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onSchedule = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onSchedule.apply(bgGeo, arguments);
+        return bgGeo.onSchedule.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onEnabledChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onEnabledChange.apply(bgGeo, arguments);
+        return bgGeo.onEnabledChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onConnectivityChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onConnectivityChange.apply(bgGeo, arguments);
+        return bgGeo.onConnectivityChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onPowerSaveChange = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onPowerSaveChange.apply(bgGeo, arguments);
+        return bgGeo.onPowerSaveChange.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onNotificationAction = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onNotificationAction.apply(bgGeo, arguments);
+        return bgGeo.onNotificationAction.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.onAuthorization = function (callback) {
         var bgGeo = plugin();
-        bgGeo.onAuthorization.apply(bgGeo, arguments);
+        return bgGeo.onAuthorization.apply(bgGeo, arguments);
     };
     BackgroundGeolocation.on = function () {
         var bgGeo = plugin();
@@ -304,6 +412,10 @@ var BackgroundGeolocation = /** @class */ (function () {
     BackgroundGeolocation.destroyLocations = function () {
         var bgGeo = plugin();
         return bgGeo.destroyLocations.apply(bgGeo, arguments);
+    };
+    BackgroundGeolocation.destroyLocation = function (uuid) {
+        var bgGeo = plugin();
+        return bgGeo.destroyLocation(uuid);
     };
     BackgroundGeolocation.insertLocation = function () {
         var bgGeo = plugin();
@@ -420,6 +532,10 @@ var BackgroundGeolocation = /** @class */ (function () {
     BackgroundGeolocation.requestPermission = function () {
         var bgGeo = plugin();
         return bgGeo.requestPermission.apply(bgGeo, arguments);
+    };
+    BackgroundGeolocation.requestTemporaryFullAccuracy = function () {
+        var bgGeo = plugin();
+        return bgGeo.requestTemporaryFullAccuracy.apply(bgGeo, arguments);
     };
     return BackgroundGeolocation;
 }());

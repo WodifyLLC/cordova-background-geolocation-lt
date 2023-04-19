@@ -32,7 +32,7 @@ declare module "cordova-background-geolocation-lt" {
   *   authorization: {
   *     strategy: "JWT",
   *     accessToken: myToken.accessToken,
-  *     refreshToken: myToken.refreshToken
+  *     refreshToken: myToken.refreshToken,
   *     refreshUrl: "https://auth.your.server.com/tokens",
   *     refreshPayload: {
   *       the_refresh_token_field_name: "{refreshToken}"
@@ -147,6 +147,35 @@ declare module "cordova-background-geolocation-lt" {
     *
     */
     refreshPayload?:any;
+    /**
+     * Optional headers applied on requests to [[refreshUrl]]
+     * Defaults to: `{"Authorization":  "Bearer {accessToken}"}`
+     *
+     * The template variable `{accessToken}` will automatically be replaced with your app's current auth token.
+     *
+     * If you do not want *any* headers applied on requests to {refreshUrl}, provide an empty `{}`.
+     *
+     * ## Example
+     *
+     * ```typescript
+     * BackgroundGeolocation.ready({
+     *   authorization: {
+     *     accessToken: "XXX.YYY.ZZZ",
+     *     refreshUrl: "https://auth.domain.com/tokens",
+     *     refreshToken: "smTsfaspfgaadsfgqZerUt0wueflasdfkaxjdfeKIacb",
+     *     refreshPayload: {
+     *       "my_refresh_token": "{refreshToken}", // <-- replaced with configured refreshToken above.
+     *       "grant_type": "refresh_token",        // <-- arbitrary fields required by your auth server
+     *       "foo": "another arbitrary field"
+     *     },
+     *     refreshHeaders: {}  // <-- Empty {} to provide no refreshHeaders.
+     *   )
+     * ));
+     * ```
+     *
+     */
+     refreshHeaders?:any;
+
     /**
     * Token expiry time in seconds.
     */

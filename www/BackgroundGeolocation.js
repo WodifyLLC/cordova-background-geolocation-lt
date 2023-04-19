@@ -56,6 +56,9 @@ module.exports = {
     PERSIST_MODE_GEOFENCE: -1,
     PERSIST_MODE_NONE: 0,
 
+    ACCURACY_AUTHORIZATION_FULL: 0,
+    ACCURACY_AUTHORIZATION_REDUCED: 1,
+
     deviceSettings: DeviceSettings,
 
     logger: Logger,
@@ -93,6 +96,9 @@ module.exports = {
             API.requestPermission().then(success).catch(failure);
         }
     },
+    requestTemporaryFullAccuracy: function(purpose) {
+        return API.requestTemporaryFullAccuracy(purpose);
+    },
     getProviderState: function(success, failure) {
         if (!arguments.length) {
             return API.getProviderState();
@@ -101,59 +107,59 @@ module.exports = {
         }
     },
     onLocation: function(success, failure) {
-        this.on('location', success, failure);
+        return this.on('location', success, failure);
     },
 
     onMotionChange: function(callback) {
-        this.on('motionchange', callback);
+        return this.on('motionchange', callback);
     },
 
     onHttp: function(callback) {
-        this.on('http', callback);
+        return this.on('http', callback);
     },
 
     onHeartbeat: function(callback) {
-        this.on('heartbeat', callback);
+        return this.on('heartbeat', callback);
     },
 
     onProviderChange: function(callback) {
-        this.on('providerchange', callback);
+        return this.on('providerchange', callback);
     },
 
     onActivityChange: function(callback) {
-        this.on('activitychange', callback);
+        return this.on('activitychange', callback);
     },
 
     onGeofence: function(callback) {
-        this.on('geofence', callback);
+        return this.on('geofence', callback);
     },
 
     onGeofencesChange: function(callback) {
-        this.on('geofenceschange', callback);
+        return this.on('geofenceschange', callback);
     },
 
     onSchedule: function(callback) {
-        this.on('schedule', callback);
+        return this.on('schedule', callback);
     },
 
     onEnabledChange: function(callback) {
-        this.on('enabledchange', callback);
+        return this.on('enabledchange', callback);
     },
 
     onConnectivityChange: function(callback) {
-        this.on('connectivitychange', callback);
+        return this.on('connectivitychange', callback);
     },
 
     onPowerSaveChange: function(callback) {
-        this.on('powersavechange', callback);
+        return this.on('powersavechange', callback);
     },
 
     onNotificationAction: function(callback) {
-        this.on('notificationaction', callback);
+        return this.on('notificationaction', callback);
     },
 
     onAuthorization: function(callback) {
-        this.on('authorization', callback);
+        return this.on('authorization', callback);
     },
 
     on: function(event, success, failure) {
@@ -161,7 +167,7 @@ module.exports = {
             throw "BackgroundGeolocation event '" + event + "' was not provided with a success callback.  If you're attempting to use Promise API to add an event-listener, that won't work, since a Promise can only evaluate once.";
         }
         failure = failure || emptyFn;
-        API.addListener(event, success, failure);
+        return  API.addListener(event, success, failure);
     },
     /**
     * @alias #removeListener
@@ -276,6 +282,9 @@ module.exports = {
         } else {
             API.destroyLocations().then(success).catch(failure);
         }
+    },
+    destroyLocation: function(uuid) {
+        return API.destroyLocation(uuid);
     },
     // @deprecated
     clearDatabase: function() {
@@ -486,11 +495,11 @@ module.exports = {
     * Register a device with tracker.transistorsoft.com.  The server returns an authorization token (JWT)
     * This behaviour is specific to the Demo app.
     */
-    findOrCreateTransistorAuthorizationToken(orgname, username, url) {
+    findOrCreateTransistorAuthorizationToken: function(orgname, username, url) {
         return TransistorAuthorizationToken.findOrCreate(orgname, username, url);
     },
 
-    destroyTransistorAuthorizationToken(url) {
+    destroyTransistorAuthorizationToken: function(url) {
         return TransistorAuthorizationToken.destroy(url);
     },
 

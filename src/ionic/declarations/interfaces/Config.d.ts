@@ -1,6 +1,7 @@
 /// <reference path="../types.d.ts" />
 /// <reference path="./LocationAuthorizationAlert.d.ts" />
-
+/// <reference path="./PermissionRationale.d.ts" />
+///
 ///
 declare module "cordova-background-geolocation-lt" {
   /**
@@ -58,6 +59,7 @@ declare module "cordova-background-geolocation-lt" {
   |-------------|-----------|-----------------------------------|
   | [[stationaryRadius]] | `Integer`  | __Default: `25`__.  When stopped, the minimum distance the device must move beyond the stationary location for aggressive background-tracking to engage. |
   | [[locationAuthorizationAlert]] | `Object` | When you configure the plugin [[locationAuthorizationRequest]] `Always` or `WhenInUse` and the user *changes* that value in the app's location-services settings or *disables* location-services, the plugin will display an Alert directing the user to the **Settings** screen. |
+  | [[showsBackgroundLocationIndicator]] | `Boolean` | A `boolean` indicating whether the status bar changes its appearance when an app uses location services in the background with `Always` authorization. |
 
 
   ### [Geolocation] Android Options
@@ -90,7 +92,7 @@ declare module "cordova-background-geolocation-lt" {
 
   ## HTTP & Persistence Options
 
-  - 📘 HTTP Guide: [[HttpEvent]].
+  - 📘 [[HttpEvent | HTTP Guide]]
 
   | Option      | Type      | Note                              |
   |-------------|-----------|-----------------------------------|
@@ -140,7 +142,7 @@ declare module "cordova-background-geolocation-lt" {
 
   ## Geofencing Options
 
-  - 📘 [[Geofence]] Guide.
+  - 📘 [[Geofence | Geofencing Guide]].
 
   | Option      | Type      | Note                              |
   |-------------|-----------|-----------------------------------|
@@ -192,7 +194,7 @@ declare module "cordova-background-geolocation-lt" {
     *   BackgroundGeolocation.findOrCreateTransistorAuthorizationToken("my-company-name", "my-username");
     *
     * BackgroundGeolocation.ready({
-    *   url: url + "/v2/locations",
+    *   url: url + "/api/locations",
     *   authorization: {
     *     strategy: "JWT",
     *     accessToken: token.accessToken,
@@ -307,9 +309,35 @@ declare module "cordova-background-geolocation-lt" {
     stationaryRadius?: number;
 
     /**
-    * Disable automatic, speed-based [[distanceFilter]] scaling.
+    * The default timeout in _seconds_ when requesting a location before the SDK gives up and fires a [[LocationError]].
     *
-    * Defaults to **`false`**.  Set **`true`** to disable automatic, speed-based [[distanceFilter]] elasticity.
+    * Defaults to `60` seconds.
+    *
+    * @example
+    * ```typescript
+    * // With onLocation event
+    * BackgroundGeolocation.onLocation((Location location) => {
+    *   console.log('[onLocation] success:', location);
+    * }, ((error) => {
+    *   if (error.code == 408) {
+    *     console.log("[onLocation] error: LOCATION TIMEOUT", error);
+    *   }
+    * });
+    *
+    * // With getCurrentPosition:
+    * try {
+    *   let location = await BackgroundGeolocation.getCurrentPosition({samples: 3});
+    * } catch((error) => {
+    *   if (error.code == 408) {
+    *     console.log("[getCurrentPosition] error: LOCATION TIMEOUT",  error);
+    *   }
+    * });
+    * ```
+    *
+    * ## See Also:
+    * - [[BackgroundGeolocation.getCurrentPosition]]
+    * - [[BackgroundGeolocation.onLocation]]
+    *
     */
     locationTimeout?: number;
 
@@ -364,7 +392,7 @@ declare module "cordova-background-geolocation-lt" {
     * @break
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]].
     * - [View animation of this behavior](https://www.transistorsoft.com/shop/products/assets/images/background-geolocation-infinite-geofencing.gif)
     *
     * ![](https://dl.dropboxusercontent.com/s/7sggka4vcbrokwt/geofenceProximityRadius_iphone6_spacegrey_portrait.png?dl=1)
@@ -378,7 +406,7 @@ declare module "cordova-background-geolocation-lt" {
     * @break
     *
     * ### ℹ️ See also:
-    * - 📘 [[Geofence]] Guide.
+    * - 📘 [[Geofence | Geofencing Guide]].
     */
     geofenceInitialTriggerEntry?: boolean;
 
@@ -595,7 +623,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * ### ℹ️ See also:
     *
-    * - 📘 HTTP Guide: [[HttpEvent]].
+    * - 📘 [[HttpEvent | HTTP Guide]]
     * - 📘 [Philosophy of Operation](github:wiki/Philosophy-of-Operation)
     *
     */
@@ -615,7 +643,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 See HTTP Guide: [[HttpEvent]]
+    * - 📘 See [[HttpEvent | HTTP Guide]]
     *
     */
     method?: HttpMethod;
@@ -658,7 +686,7 @@ declare module "cordova-background-geolocation-lt" {
     * ### ℹ️ See also:
     * - [[locationTemplate]]
     * - [[geofenceTemplate]]
-    * - 📘 HTTP Guide: [[HttpEvent]].
+    * - 📘 [[HttpEvent | HTTP Guide]]
     *
     */
     httpRootProperty?: string;
@@ -699,7 +727,7 @@ declare module "cordova-background-geolocation-lt" {
     * ### ℹ️ See also:
     * - [[headers]]
     * - [[extras]]
-    * - 📘 See HTTP Guide: [[HttpEvent]]
+    * - 📘 [[HttpEvent | HTTP Guide]]
     */
     params?: Object;
 
@@ -741,7 +769,7 @@ declare module "cordova-background-geolocation-lt" {
     /**
     * Optional arbitrary key/values `{}` applied to each recorded location.
     *
-    * 📘 See HTTP Guide: [[HttpEvent]]
+    * 📘 See [[HttpEvent | HTTP Guide]]
     *
     * @example
     * ```typescript
@@ -902,7 +930,7 @@ declare module "cordova-background-geolocation-lt" {
     * - [[maxBatchSize]]
     * - [[autoSync]]
     * - [[autoSyncThreshold]]
-    * 📘 See HTTP Guide: [[HttpEvent]]
+    * 📘 See [[HttpEvent | HTTP Guide]]
     */
     batchSync?: boolean;
 
@@ -919,7 +947,7 @@ declare module "cordova-background-geolocation-lt" {
     *
     * ### ℹ️ See also:
     * - [[batchSync]]
-    * 📘 See HTTP Guide: [[HttpEvent]]
+    * 📘 See [[HttpEvent | HTTP Guide]]
     */
     maxBatchSize?: number;
 
@@ -1027,9 +1055,10 @@ declare module "cordova-background-geolocation-lt" {
     * | `battery.is_charging` | `Boolean`| Is device plugged in?|
     * | `mock`                | `Boolean`| `true` when location was recorded from a Mock location app. |
     * | `is_moving`           | `Boolean`| `true` if location was recorded while device was in *moving* state.|
+    * | `timestampMeta`       | `Object` | Renders timestamp meta-data.  See [[Config.enableTimestampMeta]].|
     *
     * ### ℹ️ See also:
-    * - 📘 HTTP Guide: [[HttpEvent]].
+    * - 📘 [[HttpEvent | HTTP Guide]]
     * - [[geofenceTemplate]]
     * - [[httpRootProperty]]
     */
@@ -1049,7 +1078,7 @@ declare module "cordova-background-geolocation-lt" {
     * ### ℹ️ See also:
     * - [[locationTemplate]]
     * - [[httpRootProperty]]
-    * - 📘 HTTP Guide: [[HttpEvent]].
+    * - 📘 [[HttpEvent | HTTP Guide]]
     *
     * @example
   	* ```typescript
@@ -1123,6 +1152,7 @@ declare module "cordova-background-geolocation-lt" {
     * | `battery.is_charging` | `Boolean`| Is device plugged in?|
     * | `mock`                | `Boolean`| `true` when geofence was recorded from a Mock location app. |
     * | `is_moving`           | `Boolean`| `true` if geofence was recorded while device was in *moving* state.|
+    * | `timestampMeta`       | `Object` | Renders timestamp meta-data.  See [[Config.enableTimestampMeta]].|
     */
     geofenceTemplate?: string;
 
@@ -1141,7 +1171,7 @@ declare module "cordova-background-geolocation-lt" {
     * Default `-1` means **no limit**.
     *
     * ### ℹ️ See also:
-    * - 📘 See HTTP Guide: [[HttpEvent]]
+    * - 📘 See [[HttpEvent | HTTP Guide]]
     */
     maxRecordsToPersist?: number;
 
@@ -1173,113 +1203,26 @@ declare module "cordova-background-geolocation-lt" {
     *
     */
     disableAutoSyncOnCellular?: boolean;
-
     /**
-    * Encrypt location data in the SDK's SQLite datbase and HTTP requests (__`AES-256-CBC`__).
-    *
-    * Defaults to `false`.  When enabled, the SDK will encrypt location data in its SQLite database.  When executing HTTP requests, the SDK will encrypt the entire request payload and encode the result as `Base64`.
-    *
-    *
-    * ```typescript
-    * BackgroundGeolocation.ready({
-    *   encrypt: true
-    * });
-    * ```
-    *
-    * ## Encryption Password
-    *
-    * The SDK's encryption stack requires a configurable encryption *password*.
-    *
-    * ## iOS
-    *
-    * - ### React Native
-    * In your __`Info.plist`__, Add the `String` key `BACKGROUND_GEOLOCATION_ENCRYPTION_PASSWORD`.
-    *
-    * ![](https://www.dropbox.com/s/amea0siu9mxroh3/ios-encryption_password.png?dl=1)
-    *
-    * - ### Cordova
-    *
-    * 📂 __`config.xml`__
-    *
-    * ```xml
-    * <platform name="ios">
-    *     <config-file parent="BACKGROUND_GEOLOCATION_ENCRYPTION_PASSWORD" target="*-Info.plist">
-    *         <string>"your secret encryption password</string>
-    *     </config-file>
-    * </platform>
-    * ```
-    *
-    * ## Android
-    *
-    * - ### React Native
-    *
-    * In your __`AndroidManifest.xml`__, add the following `<meta-data>` element:
-    *
-    * ```xml
-    * <application>
-    *     .
-    *     .
-    *     .
-    *     <meta-data
-    android:name="com.transistorsoft.locationmanager.ENCRYPTION_PASSWORD" android:value="your secret encryption password" />
-    * </application>
-    * ```
-    *
-    * - ### Cordova
-    *
-    * 📂 __`config.xml`__
-    *
-    * ```xml
-    * <platform name="android">
-    *     <config-file parent="/manifest/application" target="app/src/main/AndroidManifest.xml">
-    *         <meta-data android:name="com.transistorsoft.locationmanager.ENCRYPTION_PASSWORD" android:value="your secret encryption password" />
-    *     </config-file>
-    * </platform>
-    * ```
-    *
-    * ## RNCryptor Encryption Stack
-    *
-    * The SDK uses the [RNCryptor Encryption Stack](https://github.com/RNCryptor/RNCryptor-Spec/blob/master/RNCryptor-Spec-v3.md).  See [RNCypto](https://github.com/RNCryptor) for a list of available language implementations.
-    *
-    * After decoding the `Base64`-encoded data from the HTTP request body, you'll have a binary payload.  Extract bytes as follows:
-    *
-    * ![](https://dl.dropbox.com/s/owp61pt3cqfij16/RNCrypto-DataFormat-Spec.png?dl=1)
-    *
-    * | Name             | Description                                       |
-    * |------------------|---------------------------------------------------|
-    * | `version`        | (1 byte): Data format version. (Currently `3`).   |
-    * | `options`        | (1 byte): bit 0 - uses password (Always `1`).     |
-    * | `encryptionSalt` | (8 bytes)                                         |
-    * | `HMACSalt`       | (8 bytes)                                         |
-    * | `IV`             | (16 bytes)                                        |
-    * | `ciphertext`     | (variable) -- Encrypted in CBC mode               |
-    * | `HMAC`           | (32 bytes)
-    *
-    * See [here](https://gist.github.com/christocracy/f814dd35cfd9eced5d4de3025c38333c) for a NodeJS-based decryption example.
-    *
-    * ### Password-based decryption (abstract language)
-    *
-    * ```
-    * def Decrypt(Password, Message) =
-    *   (Version,Options,EncryptionSalt,HMACSalt,IV,Ciphertext,HMAC) = Split(Message)
-    *     EncryptionKey = PKBDF2(EncryptionSalt, 32 length, 10k iterations, Password)
-    *     HMACKey = PKBDF2(HMACSalt, 32 length, 10k iterations, password)
-    *     Header = 3 || 1 || EncryptionSalt || HMACSalt || IV
-    *     Plaintext = AES256Decrypt(Ciphertext, ModeCBC, IV, EncryptionKey)
-    *     ComputedHMAC = HMAC(Header || Ciphertext, HMACKey, SHA-256)
-    *     if ConsistentTimeEqual(ComputedHMAC, HMAC) return Plaintext else return Error
-    * ```
-    *
-    * 1. Pull apart the pieces as described in the data format.
-    * 1. Generate the encryption key using PBKDF2 (see your language docs for how to call this). Pass the password as a string, the random encryption salt, 10,000 iterations, and SHA-1 PRF. Request a length of 32 bytes.
-    * 1. Generate the HMAC key using PBKDF2 (see your language docs for how to call this). Pass the password as a string, the random HMAC salt, 10,000 iterations, and SHA-1 PRF. Request a length of 32 bytes.
-    * 1. Decrypt the data using the encryption key (above), the given IV, AES-256, and the CBC mode. This is the default mode for almost all AES encryption libraries.
-    * 1. Pass your header and ciphertext to an HMAC function, along with the HMAC key (above), and the PRF "SHA-256" (see your library's docs for what the names of the PRF functions are; this might also be called "SHA-2, 256-bits").
-    * 1. Compare the computed HMAC with the expected HMAC using a constant time equality function (see below). If they are equal, return the plaintext. Otherwise, return an error
-    *
-    * Note: The RNCryptor format v3 uses SHA-1 for PBKDF2, but SHA-256 for HMAC.
-    */
-    encrypt?: boolean;
+     * __`[Android-only]`__ Disables the automatic insert of a location record into the SDK's SQLite database and subsequent HTTP upload if configured with [[Config.url]].
+     * When a [[onProviderChange]] event fires, the Android SDK has traditionally recorded a location to show exactly *when* and *where* the state of location-services was changed (eg: Location-services disabled).
+     *
+     * Android has done this *automatically* due to the difficulty with some platforms' implementation of *Headless Tasks* ([[enableHeadless]]), where *Cordova* and *Capacitor* require implementations using *Java* code, which is often difficult for most developers.
+     *
+     * Some developers' servers have strict HTTP JSON payloads and possibly using [[locationTemplate]], where it's impossible to template the automatically appended `provider` key in the payload.
+     *
+     * ![](https://www.dropbox.com/s/ljacoquuuv5sd5r/disableProviderChangeRecord.png?dl=1)
+     *
+     *  Set `true` to disable this default behaviour.
+     *
+     * @example
+     * ```
+     * BackgroundGeolocation.ready({
+     *   disableProviderChangeRecord: true
+     * })
+     * ```
+     */
+     disableProviderChangeRecord?: boolean;
 
     /**
     * Configures the SDK for [[Authorization]] with your server (eg: [JSON Web Token](https://jwt.io/)).
@@ -1329,7 +1272,7 @@ declare module "cordova-background-geolocation-lt" {
     * Defaults to ascending (`ASC`), where oldest locations are synced first.  Descending (`DESC`) uploads latest locations first.
     *
     * ### ℹ️ See also:
-    * - 📘 See HTTP Guide: [[HttpEvent]]
+    * - 📘 See [[HttpEvent | HTTP Guide]]
     */
     locationsOrderDirection?: string;
 
@@ -1354,7 +1297,7 @@ declare module "cordova-background-geolocation-lt" {
     * ```
     *
     * ### ℹ️ See also:
-    * - 📘 See HTTP Guide: [[HttpEvent]]
+    * - 📘 See [[HttpEvent | HTTP Guide]]
     */
     httpTimeout?: number;
 
@@ -1592,7 +1535,7 @@ declare module "cordova-background-geolocation-lt" {
     * Configure the plugin to emit sound effects and local-notifications during development.
     * @break
     *
-    * Defaults to **`false`**.  When set to **`true`**, the plugin will emit debugging sounds and notifications for life-cycle events of [[BackgroundGeolocation]].
+    * Defaults to **`false`**.  When set to **`true`**, the plugin will emit debugging sounds and notifications for life-cycle events of [[BackgroundGeolocation | BackgroundGeolocation]].
     *
     * ## iOS
     *
@@ -1607,25 +1550,27 @@ declare module "cordova-background-geolocation-lt" {
     * | Event                      | iOS                     | Android                    |
     * |----------------------------|-------------------------|----------------------------|
     * | `LOCATION_RECORDED`        | <mediaplayer:https://dl.dropbox.com/s/yestzqdb6gzx7an/location-recorded.mp3?dl=0>        | <mediaplayer:https://dl.dropboxusercontent.com/s/d3e821scn5fppq6/tslocationmanager_ooooiii3_full_vol.wav?dl=0>      |
-    * | `LOCATION_SAMPLE`          | <mediaplayer:https://dl.dropbox.com/s/7inowa0folzlal3/location-sample.mp3?dl=0>          | <mediaplayer:https://dl.dropbox.com/s/8bgiyifowyf9c7n/tslocationmanager_click_tap_done_checkbox5_full_vol.wav?dl=0> |
-    * | `LOCATION_ERROR`           | <mediaplayer:https://dl.dropbox.com/s/lwmx6j2ddzke1c7/location-error.mp3?dl=0>           | <mediaplayer:https://dl.dropbox.com/s/wadrz2x6elhc65l/tslocationmanager_digi_warn.mp3?dl=0>                         |
-    * | `LOCATION_SERVICES_ON`     | <mediaplayer:https://dl.dropbox.com/s/4cith8fg58bf5rh/location-services-on.mp3?dl=0>     | n/a                                                                                                                 |
-    * | `LOCATION_SERVICES_OFF`    | <mediaplayer:https://dl.dropbox.com/s/vdntndpzl1ebeq2/location-services-off.mp3?dl=0>    | n/a                                                                                                                 |
-    * | `STATIONARY_GEOFENCE_EXIT` | <mediaplayer:https://dl.dropbox.com/s/6voj31fmmoqhveb/motionchange-true.mp3?dl=0>        | <mediaplayer:https://dl.dropbox.com/s/gjgv51pot3h2n3t/tslocationmanager_zap_fast.mp3?dl=0>                          |
-    * | `MOTIONCHANGE_FALSE`       | <mediaplayer:https://dl.dropbox.com/s/qjduicy3c9d4yfv/motionchange-false.mp3?dl=0>       | <mediaplayer:https://dl.dropbox.com/s/fm4j2t8nqzd5856/tslocationmanager_marimba_drop.mp3?dl=0>                      |
-    * | `MOTIONCHANGE_TRUE`        | <mediaplayer:https://dl.dropbox.com/s/6voj31fmmoqhveb/motionchange-true.mp3?dl=0>        | <mediaplayer:https://dl.dropbox.com/s/n5mn6tr7x994ivg/tslocationmanager_chime_short_chord_up.mp3?dl=0>              |
-    * | `STOP_DETECTION_DELAY_INITIATED` | <mediaplayer:https://dl.dropbox.com/s/34jf8sifr5nkyie/stopDetectionDelay.mp3?dl=0> | n/a                                                                                                                 |
-    * | `STOP_TIMER_ON`            | <mediaplayer:https://dl.dropbox.com/s/s6dou5vv55glq5w/stop-timeout-start.mp3?dl=0>       | <mediaplayer:https://dl.dropbox.com/s/q4a9pf0vlztfafh/tslocationmanager_chime_bell_confirm.mp3?dl=0>                |
-    * | `STOP_TIMER_OFF`           | <mediaplayer:https://dl.dropbox.com/s/c39phjw0vogg8lm/stop-timeout-cancel.mp3?dl=0>      | <mediaplayer:https://dl.dropbox.com/s/9o9v826was19lyi/tslocationmanager_bell_ding_pop.mp3?dl=0>                     |
-    * | `HEARTBEAT`                | <mediaplayer:https://dl.dropbox.com/s/5rdc38isc8yf323/heartbeat.mp3?dl=0>                | <mediaplayer:https://dl.dropbox.com/s/bsdtw21hscqqy67/tslocationmanager_peep_note1.wav?dl=0>                        |
-    * | `GEOFENCE_ENTER`           | <mediaplayer:https://dl.dropbox.com/s/i4hzh4rgmd1lo20/geofence-enter.mp3?dl=0>           | <mediaplayer:https://dl.dropbox.com/s/76up5ik215xwxh1/tslocationmanager_beep_trip_up_dry.mp3?dl=0>                  |
-    * | `GEOFENCE_EXIT`            | <mediaplayer:https://dl.dropbox.com/s/nwonzl1ni15qv1k/geofence-exit.mp3?dl=0>            | <mediaplayer:https://dl.dropbox.com/s/xuyyagffheyk8r7/tslocationmanager_beep_trip_dry.mp3?dl=0>                     |
-    * | `GEOFENCE_DWELL_START`     | <mediaplayer:https://dl.dropbox.com/s/djlpw2ejaioq0g2/geofence-dwell-start.mp3?dl=0>     | n/a                                                                                                                 |
-    * | `GEOFENCE_DWELL_CANCEL`    | <mediaplayer:https://dl.dropbox.com/s/37xvre56gz3ro58/geofence-dwell-cancel.mp3?dl=0>    | n/a                                                                                                                 |
-    * | `GEOFENCE_DWELL`           | `GEOFENCE_ENTER` after `GEOFENCE_DWELL_START`                                            | <mediaplayer:https://dl.dropbox.com/s/uw5vjuatm3wnuid/tslocationmanager_beep_trip_up_echo.mp3?dl=0>                 |
-    * | `ERROR`                    | <mediaplayer:https://dl.dropbox.com/s/13c50fnepyiknnb/error.mp3?dl=0>                    | <mediaplayer:https://dl.dropbox.com/s/32e93c1t4kh69p1/tslocationmanager_music_timpani_error_01.mp3?dl=0>            |
-    * | `WARNING`                  | n/a                                                                                      | <mediaplayer:https://dl.dropbox.com/s/wadrz2x6elhc65l/tslocationmanager_digi_warn.mp3?dl=0>                         |
-    * | `BACKGROUND_FETCH`         | <mediaplayer:https://dl.dropbox.com/s/am91js76s0ehjo1/background-fetch.mp3?dl=0>         | n/a                                                                                                                 |
+    * | `LOCATION_SAMPLE`          | <mediaplayer:https://dl.dropbox.com/s/8gp2nkzza2hql4r/location-sample.mp3?dl=0>          | <mediaplayer:https://dl.dropboxusercontent.com/s/8bgiyifowyf9c7n/tslocationmanager_click_tap_done_checkbox5_full_vol.wav?dl=0> |
+    * | `LOCATION_ERROR`           | <mediaplayer:https://dl.dropbox.com/s/l3rmf99rj3g5u6b/location-error.mp3?dl=0>           | <mediaplayer:https://dl.dropboxusercontent.com/s/wadrz2x6elhc65l/tslocationmanager_digi_warn.mp3?dl=0>                         |
+    * | `LOCATION_SERVICES_ON`     | <mediaplayer:https://dl.dropbox.com/s/urbjiqn0f4g1jhi/location-services-on.mp3?dl=0>     | n/a                                                                                                                 |
+    * | `LOCATION_SERVICES_OFF`    | <mediaplayer:https://dl.dropbox.com/s/0wb7qajfb0yy9w0/location-services-off.mp3?dl=0>    | n/a                                                                                                                 |
+    * | `STATIONARY_GEOFENCE_EXIT` | <mediaplayer:https://dl.dropbox.com/s/p8ee60qvfgx4vi5/motionchange-true.mp3?dl=0>        | <mediaplayer:https://dl.dropboxusercontent.com/s/gjgv51pot3h2n3t/tslocationmanager_zap_fast.mp3?dl=0>                          |
+    * | `MOTIONCHANGE_FALSE`       | <mediaplayer:https://dl.dropbox.com/s/xk00hsfi87nrw3q/motionchange-false.mp3?dl=0>       | <mediaplayer:https://dl.dropboxusercontent.com/s/fm4j2t8nqzd5856/tslocationmanager_marimba_drop.mp3?dl=0>                      |
+    * | `MOTIONCHANGE_TRUE`        | <mediaplayer:https://dl.dropbox.com/s/p8ee60qvfgx4vi5/motionchange-true.mp3?dl=0>        | <mediaplayer:https://dl.dropboxusercontent.com/s/n5mn6tr7x994ivg/tslocationmanager_chime_short_chord_up.mp3?dl=0>              |
+    * | `MOTION_TRIGGER_DELAY_START` | n/a | <mediaplayer:https://dl.dropboxusercontent.com/s/cb3fa0zp0c4xjmt/tslocationmanager_dot_retry.wav?dl=0>                                                                                                            |
+    * | `MOTION_TRIGGER_DELAY_CANCEL`| n/a | <mediaplayer:https://dl.dropboxusercontent.com/s/4pg3r4xooi9pe0g/tslocationmanager_dot_stopaction2.wav?dl=0>                                                                                                      |
+    * | `STOP_DETECTION_DELAY_INITIATED` | <mediaplayer:https://dl.dropbox.com/s/y898zopjfolx42d/stopDetectionDelay.mp3?dl=0> | n/a                                                                                                                 |
+    * | `STOP_TIMER_ON`            | <mediaplayer:https://dl.dropbox.com/s/7mjcmnszhjo6ywj/stop-timeout-start.mp3?dl=0>       | <mediaplayer:https://dl.dropboxusercontent.com/s/q4a9pf0vlztfafh/tslocationmanager_chime_bell_confirm.mp3?dl=0>                |
+    * | `STOP_TIMER_OFF`           | <mediaplayer:https://dl.dropbox.com/s/qnsdu7b6vxic01i/stop-timeout-cancel.mp3?dl=0>      | <mediaplayer:https://dl.dropboxusercontent.com/s/9o9v826was19lyi/tslocationmanager_bell_ding_pop.mp3?dl=0>                     |
+    * | `HEARTBEAT`                | <mediaplayer:https://dl.dropbox.com/s/90vyfo3woe52ijo/heartbeat.mp3?dl=0>                | <mediaplayer:https://dl.dropboxusercontent.com/s/bsdtw21hscqqy67/tslocationmanager_peep_note1.wav?dl=0>                        |
+    * | `GEOFENCE_ENTER`           | <mediaplayer:https://dl.dropbox.com/s/h3047lybsggats7/geofence-enter.mp3?dl=0>           | <mediaplayer:https://dl.dropboxusercontent.com/s/76up5ik215xwxh1/tslocationmanager_beep_trip_up_dry.mp3?dl=0>                  |
+    * | `GEOFENCE_EXIT`            | <mediaplayer:https://dl.dropbox.com/s/2e8bg22c6g9zwxr/geofence-exit.mp3?dl=0>            | <mediaplayer:https://dl.dropboxusercontent.com/s/xuyyagffheyk8r7/tslocationmanager_beep_trip_dry.mp3?dl=0>                     |
+    * | `GEOFENCE_DWELL_START`     | <mediaplayer:https://dl.dropbox.com/s/7nysvyjxuxm9pms/geofence-dwell-start.mp3?dl=0>     | n/a                                                                                                                 |
+    * | `GEOFENCE_DWELL_CANCEL`    | <mediaplayer:https://dl.dropbox.com/s/sk2hur6nxch1zvm/geofence-dwell-cancel.mp3?dl=0>    | n/a                                                                                                                 |
+    * | `GEOFENCE_DWELL`           | `GEOFENCE_ENTER` after `GEOFENCE_DWELL_START`                                            | <mediaplayer:https://dl.dropboxusercontent.com/s/uw5vjuatm3wnuid/tslocationmanager_beep_trip_up_echo.mp3?dl=0>                 |
+    * | `ERROR`                    | <mediaplayer:https://dl.dropbox.com/s/h5b52m056pfc734/error.mp3?dl=0>                    | <mediaplayer:https://dl.dropboxusercontent.com/s/32e93c1t4kh69p1/tslocationmanager_music_timpani_error_01.mp3?dl=0>            |
+    * | `WARNING`                  | n/a                                                                                      | <mediaplayer:https://dl.dropboxusercontent.com/s/wadrz2x6elhc65l/tslocationmanager_digi_warn.mp3?dl=0>                         |
+    * | `BACKGROUND_FETCH`         | <mediaplayer:https://dl.dropbox.com/s/mcsjqye0xx2kapk/background-fetch.mp3?dl=0>         | n/a                                                                                                                 |
     *
     */
     debug?: boolean;
@@ -1633,10 +1578,10 @@ declare module "cordova-background-geolocation-lt" {
     /**
     * Controls the volume of recorded events in the plugin's logging database.
     *
-    * [[BackgroundGeolocation]] contains powerful logging features.  By default, the plugin boots with a value of [[BackgroundGeolocation.LOG_LEVEL_OFF]],
+    * [[BackgroundGeolocation | BackgroundGeolocation]] contains powerful logging features.  By default, the plugin boots with a value of [[BackgroundGeolocation.LOG_LEVEL_OFF]],
     * storing [[logMaxDays]] (default `3`) days worth of logs in its SQLite database.
     *
-    * The following log-levels are defined as **constants** on this [[BackgroundGeolocation]] class:
+    * The following log-levels are defined as **constants** on this [[BackgroundGeolocation | BackgroundGeolocation]] class:
     *
     * | Label                                       |
     * |---------------------------------------------|
@@ -1792,19 +1737,156 @@ declare module "cordova-background-geolocation-lt" {
     pausesLocationUpdatesAutomatically?: boolean;
 
     /**
-    * Defines the *desired* location-authorization request you *wish* for the user to authorize: "Always" or "When In Use".
+    * [__iOS Only__] A Boolean indicating whether the status bar changes its appearance when an app uses location services in the background with `Always` authorization.
+    *
+    * The default value of this property is `false`. The background location usage indicator is a blue bar or a blue pill in the status bar on iOS; on watchOS the indicator is a small icon. Users can tap the indicator to return to your app.
+    *
+    * This property affects only apps that received `Always` authorization. When such an app moves to the background, the system uses this property to determine whether to change the status bar appearance to indicate that location services are in use. Set this value to true to maintain transparency with the user.
+    *
+    * For apps with When In Use authorization, the system changes the appearance of the status bar when the app uses location services in the background.
+    */
+    showsBackgroundLocationIndicator?: boolean;
+    /**
+    * Defines the *desired* location-authorization request you *wish* for the user to authorize:
+    * - __`Always`__
+    * - __`WhenInUse`__
+    * - __`Any`__
+    *
     * @break
     *
-    * **`locationAuthorizationRequest`** tells the plugin the mode it *expects* to have been authorized with *by the user*.  If the user changes this mode in their settings, the plugin will detect this (See [[locationAuthorizationAlert]]).  Defaults to **`Always`**.  **`WhenInUse`** will display a **blue bar** at top-of-screen informing user that location-services are on.
+    * **`locationAuthorizationRequest`** tells the plugin the mode it *expects* to have been authorized with *by the user*.  Defaults to __`Always`__.  If you _don't care_ what the user authorizes, you may configure __`locationAuthorizationRequest: "Any"`__.
     *
-    * **Note:**  For *Android*, this option applies only to Android Q (API 29) and later.
+    * If you configure __`locationAuthorizationRequest: 'Always'`__ but the user authorizes only __`[When in Use]`__ , the plugin will detect this and show the [[locationAuthorizationAlert]] dialog (see [[disableLocationAuthorizationAlert]] to disable this behaviour).
     *
-    * ![](https://dl.dropboxusercontent.com/s/88y3i4nkqq3o9ee/ios-location-authorization-dialog.png?dl=1)
+    * # iOS
+    * ----------------------------------------------------------------
     *
-    * If you configure **`Any`**, the plugin allow the user to choose either `Always` or `WhenInUse`.   The plugin will **not** show the [[locationAuthorizationAlert]] dialog when the user changes the selection in `Privacy->Location Services`.
+    * iOS 13 introduced a significant modification to *location authorization* (See this [blog entry](https://medium.com/@transistorsoft/ios-13-and-android-q-support-beb7595d2c24)).  No longer will the __`[Always allow]`__ option appear on the initial authorization dialog.  Instead, iOS will prompt the user with a second "authorization upgrade" dialog, asking the user if they'd like to grant __`[Keep Only While Using ]`__ or __`[Change to Always Allow]`__.
     *
-    * ### ⚠️ Warning:
-    * - Configuring **`WhenInUse`** will disable many of the plugin's features, since iOS forbids any API which operates in the background to operate (such as **geofences**, which the plugin relies upon to automatically engage background tracking).
+    * ### 1.  __`locationAuthorizationRequest: 'Always'`__:
+    *
+    * If your app requests __`locationAuthorizationRequest: 'Always'`__, the user must first authorize __`[Alow While Using App]`__, followed *immediately* by a second dialog prompting the user to upgrade location authorization with __`[Change to Always Allow]`__:
+    *
+    * ![](https://dl.dropbox.com/s/0alq10i4pcm2o9q/ios-when-in-use-to-always-CHANGELOG.gif?dl=1)
+    *
+    * If the user __denies__ __`Always`__ authorization, the [[locationAuthorizationAlert]] will be shown (see [[disableLocationAuthorizationAlert]] to disable this behaviour).
+    *
+    * ![](https://dl.dropbox.com/s/wk66ave2mzq6m6a/ios-locationAuthorizationAlert.jpg?dl=1)
+    *
+    * ### 2.  __`locationAuthorizationRequest: 'WhenInUse'`__:
+    *
+    * Only the initial dialog will be shown:
+    *
+    * ![](https://dl.dropbox.com/s/n38qehw3cjhzngy/ios13-location-authorization.png?dl=1)
+    *
+    * *However*, if your app *later* uses __`setConfig`__ to change __`locationAuthorizationRequest: 'Always'`__, iOS will *immediately* show the "authorization upgrade" dialog:
+    *
+    * ![](https://dl.dropbox.com/s/5syokc8rtrc9q35/ios13-location-authorization-upgrade-always.png?dl=1)
+    *
+    * ### 3.  __`locationAuthorizationRequest: 'Any'`__:
+    *
+    * The SDK will request `Always` authorization.  The initial location authorization dialog will be shown:
+    *
+    * ![](https://dl.dropbox.com/s/n38qehw3cjhzngy/ios13-location-authorization.png?dl=1)
+    *
+    * However, at some *unknown time* in the future, iOS will prompt the user with the location authorization upgrade dialog:
+    *
+    * ![](https://dl.dropbox.com/s/5syokc8rtrc9q35/ios13-location-authorization-upgrade-always.png?dl=1)
+    *
+    * @example
+    *
+    * ```javascript
+    * onAppLaunch() {
+    *   // Initially configure for 'WhenInUse'.
+    *   BackgroundGeolocation.ready({
+    *     locationAuthorizationRequest: 'WhenInUse',
+    *     .
+    *     .
+    *     .
+    *   });
+    * }
+    *
+    * async onClickStartTracking() {
+    *   // Initial location authorization dialog for "When in Use" authotization
+    *   // will be shown here.
+    *   await BackgroundGeolocation.start();
+    *   // some time later -- could be immediately after, hours later, days later, etc.,
+    *   // you can upgrade the config to 'Always' whenever you wish:
+    *   upgradeToAlwaysAllow();
+    * }
+    *
+    * upgradeToAlwaysAllow() {
+    *   // Simply update `locationAuthorizationRequest` to "Always" -- the SDK
+    *   // will cause iOS to immediately show the authorization upgrade dialog
+    *   // for "Change to Always Allow":
+    *   BackgroundGeolocation.setConfig({
+    *     locationAuthorizationRequest: 'Always'
+    *   });
+    * }
+    * ```
+    *
+    * &nbsp;
+    * # Android
+    * ----------------------------------------------------------------
+    *
+    * ## Android 10
+    *
+    * Like iOS 12, Android 10 now forces your app to offer *both* __`[Allow all the time]`__ and __`[Allow only while using]`__ options.
+    *
+    * ![](https://dl.dropbox.com/s/jv3g2sgap69qhfx/android-10-location-authorization-dialog.png?dl=1)
+    *
+    *
+    * ## Android 11+ (with `targetSdkVersion 30+`)
+    *
+    * Just as in iOS 13/14, Android 11 has [changed location authorization](https://developer.android.com/preview/privacy/location) and no longer offers the __`[Allow all the time]`__ button on the location authorization dialog.  Instead, Android now offers a hook to present a custom dialog to the user where you will explain exactly why you require _"Allow all the time"_ location permission.
+    *
+    * This dialog can forward the user directly to your application's __Location Permissions__ screen, where the user must *explicity* authorize __`[Allow all the time]`__.  The Background Geolocation SDK will present this dialog, which can be customized with [[Config.backgroundPermissionRationale]].
+    * - Android will offer the [[Config.backgroundPermissionRationale]] dialog __just once__.  Once the user presses the `positiveAction` on the dialog, it will __not__ be shown again (pressing `[Cancel]` button does not count).
+    * - If the user resets your application's _Location Permissions_ to __`[Ask every time]`__, the [[Config.backgroundPermissionRationale]] _can_ be shown once again.
+
+    * ![](https://dl.dropbox.com/s/4fq4erz2lpqz00m/android11-location-permission-rationale-dialog.png?dl=1)
+    * ![](https://dl.dropbox.com/s/dy65k8b0sgj5cgy/android11-location-authorization-upgrade-settings.png?dl=1)
+    *
+    * ```typescript
+    * BackgroundGeolocation.ready({
+    *  locationAuthorizationRequest: 'Always',
+    *  backgroundPermissionRationale: {
+    *   title: "Allow access to this device's location in the background?",
+    *   message: "In order to allow X, Y and Z, please enable 'Allow all the time permission",
+    *   positiveAction: "Change to Allow all the time"
+    *  }
+    * });
+    * ```
+    *
+    *
+    * ### 1.  __`locationAuthorizationRequest: 'Always'`__:
+    *
+    * If your app requests __`locationAuthorizationRequest: 'Always'`__, the user must first authorize __`[While using the app]`__, followed *immediately* by the [[Config.backgroundPermissionRationale]] dialog prompting the user to upgrade location permission with __`[Allow all the time]`__:
+    *
+    * ![](https://dl.dropbox.com/s/343nbrzpaavfser/android11-location-authorization-rn.gif?dl=1)
+    *
+    * ### 2.  __`locationAuthorizationRequest: 'WhenInUse'`__:
+    *
+    * Only the initial dialog will be shown:
+    *
+    * ![](https://dl.dropbox.com/s/ymybwme7fvda0ii/android11-location-when-in-use-system-dialog.png?dl=1)
+    *
+    * *However*, if your app *later* uses __`setConfig`__ to change __`locationAuthorizationRequest: 'Always'`__, the SDK will *immediately* show the [[Config.backgroundPermissionRationale]] dialog:
+    *
+    * ![](https://dl.dropbox.com/s/4fq4erz2lpqz00m/android11-location-permission-rationale-dialog.png?dl=1)
+    *
+    * ### 3.  __`locationAuthorizationRequest: 'Any'`__:
+    *
+    * Same as __`Always`__
+    *
+    * ## Android 11+ (with `targetSdkVersion <=29`)
+    *
+    * Just to add a bit more confusion, for Android 11+ devices and your app built with __`targetSdkVersion 29`__, Android will present an extra dialog after the user clicks through on the [[Config.backgroundPermissionRationale]] dialog, where the user is prompted with a link _"Allow in Settings"*, rather than forwarding them directly to the _Location Permissions_ screen, as with __`targetSdkVersion 30+`__:
+    *
+    * ![](https://dl.dropbox.com/s/mp3zykohr95wafq/android11-location-authorization-upgrade.png?dl=1)
+    *
+    * ![](https://dl.dropbox.com/s/a01e0c6750bqylr/android11-location-authorization-cordova-targetSdkVersion29.gif?dl=1)
+    *
     */
     locationAuthorizationRequest?: LocationAuthorizationRequest;
 
@@ -1822,7 +1904,7 @@ declare module "cordova-background-geolocation-lt" {
     *   locationAuthorizationAlert: {
     *     titleWhenNotEnabled: "Yo, location-services not enabled",
     *     titleWhenOff: "Yo, location-services OFF",
-    *     instructions: "You must enable "Always" in location-services, buddy",
+    *     instructions: "You must enable 'Always' in location-services, buddy",
     *     cancelButton: "Cancel",
     *     settingsButton: "Settings"
     *   }
@@ -1845,6 +1927,8 @@ declare module "cordova-background-geolocation-lt" {
     * ## iOS
     *
     * The iOS alert dialog text elements can be configured via [[locationAuthorizationAlert]] and [[locationAuthorizationRequest]].
+    *
+    * ![](https://dl.dropbox.com/s/wk66ave2mzq6m6a/ios-locationAuthorizationAlert.jpg?dl=1)
     *
     * ## Android
     *
@@ -2109,6 +2193,45 @@ declare module "cordova-background-geolocation-lt" {
     triggerActivities?: string;
 
     /**
+    * __`[Android only]`__  Optionally add a delay in milliseconds to trigger Android into the *moving* state when Motion API reports the device is moving (eg: `on_foot`, `in_vehicle`)
+    *
+    * This can help prevent false-positive motion-triggering when one moves about their home, for example.  Only if the Motion API stays in the *moving* state for `motionTriggerDelay` milliseconds will the plugin trigger into the *moving* state and begin tracking the location.
+    * If the Motion API returns to the `still` state before `motionTriggerDelay` times-out, the trigger to the *moving* state will be cancelled.
+    *
+    * @example
+    * ```typescript
+    * // Delay Android motion-triggering by 30000ms
+    * BackgroundGeolocation.ready({
+    *   motionTriggerDelay: 30000
+    * })
+    * ```
+    * @break
+    * The following `logcat` shows an Android device detecting motion __`on_foot`__ but returning to __`still`__ before __`motionTriggerDelay`__ expires, cancelling the transition to the *moving* state (see `⏰ Cancel OneShot: MOTION_TRIGGER_DELAY`):
+    * @logcat
+    * ```bash
+    *  04-08 10:58:03.419 TSLocationManager: ╔═════════════════════════════════════════════
+    *  04-08 10:58:03.419 TSLocationManager: ║ Motion Transition Result
+    *  04-08 10:58:03.419 TSLocationManager: ╠═════════════════════════════════════════════
+    *  04-08 10:58:03.419 TSLocationManager: ╟─ 🔴  EXIT: still
+    *  04-08 10:58:03.419 TSLocationManager: ╟─ 🎾  ENTER: on_foot
+    *  04-08 10:58:03.419 TSLocationManager: ╚═════════════════════════════════════════════
+    *  04-08 10:58:03.416 TSLocationManager:   ⏰ Scheduled OneShot: MOTION_TRIGGER_DELAY in 30000ms
+    *  .
+    *  . <motionTriggerDelay timer started>
+    *  .
+    *  04-08 10:58:19.385 TSLocationManager: ╔═════════════════════════════════════════════
+    *  04-08 10:58:19.385 TSLocationManager: ║ Motion Transition Result
+    *  04-08 10:58:19.385 TSLocationManager: ╠═════════════════════════════════════════════
+    *  04-08 10:58:19.385 TSLocationManager: ╟─ 🔴  EXIT: on_foot
+    *  04-08 10:58:19.385 TSLocationManager: ╟─ 🎾  ENTER: still
+    *  04-08 10:58:19.385 TSLocationManager: ╚═════════════════════════════════════════════
+    *  04-08 10:58:19.381 TSLocationManager: [c.t.l.s.TSScheduleManager cancelOneShot]
+    *  04-08 10:58:19.381 TSLocationManager:   ⏰ Cancel OneShot: MOTION_TRIGGER_DELAY <-- timer cancelled
+    * ```
+    */
+    motionTriggerDelay?: number;
+
+    /**
     * __`[Android only]`__ Enables "Headless" operation allowing you to respond to events after you app has been terminated with [[stopOnTerminate]] __`false`__.
     * @break
     *
@@ -2223,11 +2346,59 @@ declare module "cordova-background-geolocation-lt" {
     forceReloadOnSchedule?: boolean;
 
     /**
+    * (__Android 11+__) Configure the dialog presented to the user when *Always* location permission is requested.
+    *
+    * Just as in iOS 13/14, Android 11 has [changed location authorization](https://developer.android.com/preview/privacy/location) and no longer offers the __`[Allow all the time]`__ button on the location authorization dialog.  Instead, Android now offers a hook to present a custom dialog to the user where you will explain exactly why you require _"Allow all the time"_ location permission.
+    *
+    * This dialog can forward the user directly to your application's __Location Permissions__ screen, where the user must *explicity* authorize __`[Allow all the time]`__.  The Background Geolocation SDK will present this dialog, which can be customized with [[backgroundPermissionRationale]].
+    *
+    * ![](https://dl.dropbox.com/s/343nbrzpaavfser/android11-location-authorization-rn.gif?dl=1)
+    *
+    * - Android will offer the [[backgroundPermissionRationale]] dialog __just once__.  Once the user presses the `positiveAction` on the dialog, it will __not__ be shown again (pressing `[Cancel]` button does not count).
+    * - If the user resets your application's _Location Permissions_ to __`[Ask every time]`__, the [[backgroundPermissionRationale]] _can_ be shown once again.
+    *
+    * ![](https://dl.dropbox.com/s/4fq4erz2lpqz00m/android11-location-permission-rationale-dialog.png?dl=1)
+    * ![](https://dl.dropbox.com/s/dy65k8b0sgj5cgy/android11-location-authorization-upgrade-settings.png?dl=1)
+    *
+    * @example
+    * ```javascript
+    * BackgroundGeolocation.ready({
+    *  locationAuthorizationRequest: 'Always',
+    *  backgroundPermissionRationale: {
+    *    title: "Allow {applicationName} to access to this device's location in the background?",
+    *    message: "In order to track your activity in the background, please enable {backgroundPermissionOptionLabel} location permission",
+    *    positiveAction: "Change to {backgroundPermissionOptionLabel}",
+    *    negativeAction: "Cancel"
+    *  }
+    * });
+    * ```
+    *
+    * ## Template Tags
+    *
+    * A limited number of template-tags are supported in each of the attributes, by wrapping with __`{tagName}`__:
+    *
+    * | Template Tag                            | Default value         | Description                                                            |
+    * |-----------------------------------------|-----------------------|------------------------------------------------------------------------|
+    * | __`{backgroundPermissionOptionLabel}`__ | *Allow all the time*  | (*API Level 30*) Gets the localized label that corresponds to the option in settings for granting background access. |
+    * | __`{applicationName}`__                 | *Your App Name*       | Returns the localized name of your application from `AndroidManifest` |
+    *
+    * &nbsp;
+    *
+    * __See also:__
+    * - [[locationAuthorizationRequest]]
+    * - [[BackgroundGeolocation.requestPermission]]
+    * - [Location udpates in Android 11](https://developer.android.com/about/versions/11/privacy/location)
+    *
+    *
+    */
+    backgroundPermissionRationale?: PermissionRationale;
+
+    /**
     * [__Android only]__ Configures the persistent foreground-service [[Notification]] required by Android.
     *
     * ![](https://dl.dropbox.com/s/acuhy5cu4p7uofr/android-foreground-service-default.png?dl=1)
     *
-    * See [Notification] for detailed usage.
+    * See [[Notification]] for detailed usage.
     *
     * @example
     * ```typescript
