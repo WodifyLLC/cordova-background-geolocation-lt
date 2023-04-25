@@ -60,9 +60,6 @@ FOUNDATION_EXPORT NSString* TSLocationManagerVersion;
 
 /// The SDK's `CLLocationManager` instance.
 @property (nonatomic, strong, readonly) CLLocationManager *locationManager;
-
-@property (nonatomic) CLLocationDistance distanceFilter;
-
 /// :nodoc:
 @property (nonatomic, strong, readonly) LocationManager *currentPositionManager;
 /// :nodoc:
@@ -260,7 +257,6 @@ FOUNDATION_EXPORT NSString* TSLocationManagerVersion;
 - (void) destroyLocation:(NSString*)uuid;
 - (void) destroyLocation:(NSString*)uuid success:(void(^)(void))success failure:(void(^)(NSString* error))failure;
 - (void) insertLocation:(NSDictionary*)params success:(void(^)(NSString* uuid))success failure:(void(^)(NSString* error))failure;
-- (void) persistLocation:(TSLocation*)location;
 - (int) getCount;
 
 #pragma mark - Application Methods
