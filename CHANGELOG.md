@@ -1,42 +1,5 @@
 # Change Log
 
-## 4.11.2 &mdash; 2023-04-12
-* [Android] Fix String concatenation issue on Turkish devices where method-name composed for use with reflection is in
-correctly capitalized (ie: `isMoving -> `setIsMoving` is incorrectly capitalized with Turkish capital as `setİsMoving`
-.  Simply enforce `Locale.ENGLISH` when performing `String.toUpperCase(Locale.ENGLISH)`.
-
-* [iOS] Fix bug in TSScheduler.  When schedule was cleared via .setConfig, only the State.schedulerEnabled property was set to false, but the TSScheduler singleton contained an internal 'enabled' property which was not reset to false.  Solution was to simply call stop() method upon TSScheduler singleton.
-
-## 4.11.1 &mdash; 2023-03-30
-* [Android] Bump default `hmsLocationVersion = 6.9.0.300`.  There are reports of Google rejecting apps due to older huawei HMS dependenc
-ies.
-* [Android] Fix `ClassCastException` related to Motion API error.
-
-## 4.11.0 &mdash; 2023-03-29
-* [Android] Introduce __Huawei HMS Support__.  Requires a separate license key [purchased here](https://shop.transistorsoft.com/collections/frontpage/products/huawei-background-geolocation).
-* [iOS] Fix for iOS 16.4.  iOS 16.4 introduces changes to CoreLocation behaviour when using Config.showsBackgroundLocationIndi
-cator: false.
-* [Android] Added extra logic in a location error-handler to mitigate against a possible edge-case where a location-error fetching the onMotionChange position could possibly result in an infinite loop, causing a stackoverflow exception:
-```
-at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:264)
-at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
-at com.transistorsoft.locationmanager.location.TSLocationManager.getCurrentPosition(TSLocationManager.java:3)
-at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:321)
-at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
-at com.transistorsoft.locationmanager.location.TSLocationManager.getCurrentPosition(TSLocationManager.java:3)
-at com.transistorsoft.locationmanager.service.TrackingService.changePace(TrackingService.java:321)
-at com.transistorsoft.locationmanager.service.TrackingService$c.onError(TrackingService.java:69)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.onError(SingleLocationRequest.java:18)
-at com.transistorsoft.locationmanager.location.SingleLocationRequest.start(SingleLocationRequest.java:71)
-.
-.
-.
-```
-
 ## 4.10.0 &mdash; 2023-02-01
 * [Fixed][Android] Implement support for `play-services-location v21` (`GOOGLE_API_VERSION` in the plugin Config).  The plugin can now work with either `<= v20` or `>= v21`.
 * [CHANGE] :warning: *AndroidX* is now **required**.  You must enable *AndroidXEnabled* in your `config.xml`:
