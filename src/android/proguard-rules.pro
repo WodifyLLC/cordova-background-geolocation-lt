@@ -3,11 +3,6 @@
 -keep class com.transistorsoft** { *; }
 -dontwarn com.transistorsoft.**
 
-# Huawei Adapter
--keep class com.google.android.gms.** {*;}
--keep interface com.google.android.gms.** {*;}
--dontwarn com.huawei.**
-
 # BackgroundGeolocation (EventBus)
 -keepattributes *Annotation*
 -keepclassmembers class * {
@@ -32,6 +27,3 @@
 -dontwarn org.conscrypt.**
 # A resource is loaded with a relative path so the package of this class must be preserved.
 -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
-
-# LifecycleObserver
--keep class androidx.lifecycle.FullLifecycleObserver
